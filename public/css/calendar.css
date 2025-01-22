@@ -1,0 +1,89 @@
+.event-available{
+    background-color: green;
+}
+.event-unavailable {
+    background-color: black;
+}
+.event-promotion {
+    background-color: red;
+}
+
+#calendar{
+    max-width: 650px !important;
+
+}
+#status{
+    max-width: 90% !important;
+}
+#valor_esp{
+    max-width: 60% !important;
+
+}
+
+/* Estilos para o calendário */
+.fc-daygrid-day-frame {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    height: 100%; 
+    border: 1px solid #ccc;
+    background-color: white;
+}
+
+.fc-daygrid-day .fc-daygrid-day-top {
+    font-size: 14px;
+    height: 70%;
+}
+.fc-daygrid-day-events {
+    height: 30%;
+}
+.fc-event-title-container {
+    width: 100% !important;
+    height: 100% !important;
+}
+.fc-daygrid-day-number {
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none !important;
+    color: black;
+}
+
+.fc-day-today .fc-daygrid-day-top {
+    background-color: #0E2238 !important; /* Cor de fundo (azul) */
+}
+
+.fc-day-today .fc-daygrid-day-number {
+    color: white !important;
+}
+.fc-col-header-cell-cushion{
+    text-decoration: none !important;
+    color: black !important;
+}
+
+.class-input{
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.form-cont{
+        display: block;
+        width: 100%;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        color: var(--bs-body-color);
+        background-color: var(--bs-body-bg);
+        background-clip: padding-box;
+        border-radius: var(--bs-border-radius);
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}

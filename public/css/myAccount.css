@@ -1,0 +1,32 @@
+.form-control{
+    border: 1px solid black !important;
+}
+.form-check-input{
+    border: 1px solid black !important;
+}
+
+.line {
+    border-top: 1px solid black;
+}
+.preco-input{
+    display: block;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.wrapper *, 
+.wrapper *::after, 
+.wrapper *::before {
+    box-sizing: border-box;
+}

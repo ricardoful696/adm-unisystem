@@ -1,0 +1,13 @@
+.form-control{
+    border: 1px solid black !important;
+}
+
+.max{
+    max-width: 100vw !important;
+}
+
+.wrapper *, 
+.wrapper *::after, 
+.wrapper *::before {
+    box-sizing: border-box;
+}

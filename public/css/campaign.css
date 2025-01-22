@@ -1,0 +1,35 @@
+/* Estilos para a tabela */
+.campaigns-table {
+    border-collapse: collapse;
+}
+
+.campaigns-table th, .campaigns-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Estilo para as linhas de detalhes (inicialmente ocultas) */
+.details-row {
+    background-color: #f9f9f9;
+}
+
+/* Estilo para o botão de expansão */
+.expand-btn {
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+/* Estilo para o texto dentro do expand */
+.campaign-details {
+    padding: 10px;
+    font-size: 14px;
+}
+.modal-dialog{
+    max-width: 60% !important;
+}
+@media (max-width: 768px) {
+    .modal-dialog{
+        max-width: 50% !important;
+    }
+}
