@@ -1,6 +1,5 @@
 @include('masks.header', ['css' => 'css/enterprisePayment.css'])
 
-
 <div class="col-11 d-flex flex-column justify-content-center align-items-center mt-5" id="total" >
     <div class="col-12 text-end">
         <button class="btn btn-success px-5" type="button" onclick="salvarConfiguracoes()">Salvar</button>
@@ -24,7 +23,14 @@
             <div class="d-flex px-5 col-12  justify-content-between">
                 <div class="my-4 col-12 col-md-6">
                     <div class="d-flex flex-column">
-                        <h5>Homologação</h5>
+                        <div class="d-flex" >
+                            <h5>Homologação</h5>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input mx-1" id="toggle_homologacao" type="checkbox" role="switch"
+                                    onchange="toggleModo('homologacao')"
+                                    @checked($empresaPagamento->efipayParametro->homologacao)>
+                            </div>
+                        </div>
                         <div class="mb-2">
                             <label>Client ID</label>
                             <input type="text" class="input form-cont col-6" id="client_id_homologacao" name="client_id_homologacao"
@@ -39,7 +45,14 @@
                 </div>
                 <div class="my-4 col-12 col-md-6">
                     <div class="d-flex flex-column">
-                        <h5>Produção</h5>
+                        <div class="d-flex" >
+                            <h5>Produção</h5>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input mx-1" id="toggle_producao" type="checkbox" role="switch"
+                                    onchange="toggleModo('producao')"
+                                    {{ $empresaPagamento->efipayParametro->producao ? 'checked' : '' }}>
+                            </div>
+                        </div>
                         <div class="mb-2">
                             <label>Client ID</label>
                             <input type="text" class="input form-cont col-6" id="client_id_producao" name="client_id_producao"
@@ -257,6 +270,17 @@
         }
     }
 
+    function toggleModo(modo) {
+        if (modo === 'homologacao') {
+            document.getElementById('toggle_producao').checked = false;
+            document.getElementById('toggle_homologacao').checked = true;
+        } else {
+            document.getElementById('toggle_homologacao').checked = false;
+            document.getElementById('toggle_producao').checked = true;
+        }
+    }
+
+
     function salvarEfiPay() {
 
         let formData = {
@@ -268,6 +292,8 @@
             pix_rota: $('#pix_rota').val(),
             cartao_rota: $('#cartao_rota').val(),
             boleto_rota: $('#boleto_rota').val(),
+            homologacao: $('#toggle_homologacao').prop('checked'),  
+            producao: $('#toggle_producao').prop('checked')
         };
 
         $.ajax({

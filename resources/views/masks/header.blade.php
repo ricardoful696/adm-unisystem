@@ -22,6 +22,7 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/locales/pt-br.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 
@@ -33,7 +34,7 @@
                     <i class="lni lni-grid-alt"></i>
                 </button>
                 <div class="sidebar-logo">
-                    <a href="#">UniSystem</a>
+                    <a href="/home">UniSystem</a>
                 </div>
             </div>
             <div class="" >
@@ -55,6 +56,9 @@
                                 </li>
                                 <li class="sidebar-item text-center">
                                     <a href="/userDevConfig" class="sidebar-link">Usuário</a>
+                                </li>
+                                <li class="sidebar-item text-center">
+                                    <a href="/revDevConfig" class="sidebar-link">Revendedor</a>
                                 </li>
                             </ul>
                         </li>
@@ -140,6 +144,12 @@
                             <a href="/enterprisePaymentView" class="sidebar-link">
                             <i class="bi bi-credit-card"></i>
                             <span class="class-tit">Empresa Pagamento</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="/reportView" class="sidebar-link">
+                            <i class="bi bi-journals"></i>
+                            <span class="class-tit">Relatórios</span>
                             </a>
                         </li>
                         <li class="sidebar-item">

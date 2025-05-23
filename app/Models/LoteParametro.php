@@ -18,7 +18,8 @@ class LoteParametro extends Model
         'qtd_venda',
         'qtd_venda_realizada',
         'ativo',
-        'lote_numero'
+        'lote_numero',
+        'valor_desconto'
         
     ];
 

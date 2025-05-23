@@ -42,6 +42,8 @@ input:focus {
     border-color: rgb(0, 140, 255); /* Muda a borda ao clicar */
     box-shadow: 0 0 5px rgba(6, 140, 255, 1.0); /* Adiciona uma sombra ao redor */
 }
-#total{
-    
+.form-check-input{
+    width: 20px !important;
+    height: 5px !important;
+    border: 1px solid black !important;
 }

@@ -10,11 +10,11 @@
     <div class="d-flex flex-column align-items-center col-12">
         <div class="d-flex flex-column col-10 col-lg-6 mx-4 gap-3">
             <div class="d-flex my-3 col-12">
-                <div class="col-4 form-group ">
+                <div class="col-3 form-group ">
                     <label for="nome">Nome</label>
                     <input type="text" name="nome" id="nome" class="form-control" maxlength="50" required>
                 </div>
-                <div class="col-4 form-group ps-3">
+                <div class="col-3 form-group ps-3">
                     <label for="qtd_lotes">Quantidade de Lotes</label>
                     <select name="qtd_lotes" id="qtd_lotes" class="form-control" required>
                         <option value="">Selecione</option>
@@ -25,7 +25,7 @@
                         <option value="5">5</option>
                     </select>
                 </div>
-                <div class="col-4 form-group ps-3">
+                <div class="col-3 form-group ps-3">
                     <label for="tipo_lote">Tipo de Lote</label>
                     <select name="tipo_lote" id="tipo_lote" class="form-control" required>
                         <option value="">Selecione</option>
@@ -33,19 +33,13 @@
                         <option value="quantidade">Quantidade</option>
                     </select>
                 </div>
-            </div>
-            <div class="d-flex my-3">
-                <div class="col-6 form-group">
+                <div class="col-3 form-group ps-3">
                     <label for="tipo_desconto">Tipo de Desconto</label>
                     <select name="tipo_desconto" id="tipo_desconto" class="form-control" required>
                         <option value="">Selecione</option>
                         <option value="1">%</option>
                         <option value="2">R$</option>
                     </select>
-                </div>
-                <div class="col-6 form-group ps-3">
-                    <label for="valor_desconto">Valor Desconto</label>
-                    <input type="number" name="valor_desconto" id="valor_desconto" class="form-control" disabled>
                 </div>
             </div>
         </div>
@@ -90,120 +84,141 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const tipoLote = document.getElementById('tipo_lote');
-        const quantidadeLotes = document.getElementById('qtd_lotes');
-        const lotesContainer = document.getElementById('lotesContainer');
+ document.addEventListener('DOMContentLoaded', () => {
+    const tipoLote = document.getElementById('tipo_lote');
+    const quantidadeLotes = document.getElementById('qtd_lotes');
+    const lotesContainer = document.getElementById('lotesContainer');
+    
+    function aplicarMascaraReais(valor) {
+        valor = valor.replace(/\D/g, ""); 
+        valor = (valor / 100).toFixed(2) + ""; 
+        valor = valor.replace(".", ","); 
+        return "R$ " + valor;
+    }
 
-        function criarCamposLote(tipo, quantidade) {
-            lotesContainer.innerHTML = '';
-
-            for (let i = 1; i <= quantidade; i++) {
-                const loteDiv = document.createElement('div');
-                loteDiv.classList.add('lote', 'd-flex', 'flex-column');
-                loteDiv.innerHTML = `'<div>
-                                        <h5>Lote ${i}</h5>
-                                    </div>`;
-
-                if (tipo === 'data') {
-                    loteDiv.innerHTML += `
-                    <div class="d-flex gap-3">
-                        <div class="col-5">
-                            <label for="dataInicio${i}">Data Início:</label>
-                            <input type="date" id="dataInicio${i}" name="dataInicio${i}" class="form-control">
-                        </div>
-                        <div class="col-5">
-                            <label for="dataFinal${i}">Data Final:</label>
-                            <input type="date" id="dataFinal${i}" name="dataFinal${i}" class="form-control">
-                        </div>
-                    </div>
-                    `;
-                } else if (tipo === 'quantidade') {
-                    loteDiv.innerHTML += `
-                    <div class="col-10">
-                        <label for="qtdVendas${i}">Quantidade de Vendas:</label>
-                        <input type="number" id="qtdVendas${i}" name="qtdVendas${i}" min="1" class="form-control">
-                    </div>
-                    `;
-                }
-
-                lotesContainer.appendChild(loteDiv);
-            }
-
-            const dynamicDiv = document.getElementById('dynamic');
-            if (dynamicDiv) {
-                dynamicDiv.style.display = 'block';
-            }
+    function limitarPorcentagem(event) {
+        const valor = parseFloat(event.target.value);
+        if (valor > 100) {
+            event.target.value = 100;
+        } else if (valor < 0) {
+            event.target.value = 0;
         }
+    }
 
-
-        tipoLote.addEventListener('change', () => {
-            const tipo = tipoLote.value;
-            const quantidade = quantidadeLotes.value;
-
-            if (quantidade) criarCamposLote(tipo, quantidade);
-        });
-
-        quantidadeLotes.addEventListener('change', () => {
-            const tipo = tipoLote.value;
-            const quantidade = quantidadeLotes.value;
-
-            if (tipo) criarCamposLote(tipo, quantidade);
-        });
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const tipoDescontoSelect = document.getElementById('tipo_desconto');
-        const valorDescontoInput = document.getElementById('valor_desconto');
-
-        function aplicarMascaraReais(valor) {
-            valor = valor.replace(/\D/g, "");
-            valor = (valor / 100).toFixed(2) + "";
-            valor = valor.replace(".", ",");
-            return "R$ " + valor;
-        }
-
+    function aplicarRegrasDesconto() {
+        const tipoDescontoSelect = document.querySelector('#tipo_desconto');
+        const valorDescontoInputs = document.querySelectorAll('[id^="valorDesconto"]'); 
+   
         tipoDescontoSelect.addEventListener('change', function () {
             const tipoDesconto = this.value;
 
-            valorDescontoInput.value = "";
-            valorDescontoInput.removeEventListener('input', mascararReais);
-            valorDescontoInput.removeEventListener('input', limitarPorcentagem);
+            valorDescontoInputs.forEach((input) => {
+                input.value = ""; 
+                input.removeEventListener('input', mascararReais); 
+                input.removeEventListener('input', limitarPorcentagem); 
 
-            if (tipoDesconto === "1") {
-                valorDescontoInput.type = "number";
-                valorDescontoInput.max = "100";
-                valorDescontoInput.min = "0";
-                valorDescontoInput.disabled = false;
-                valorDescontoInput.placeholder = "Máximo 100";
+                if (tipoDesconto === "1") {
+                    input.type = "number";
+                    input.max = "100";
+                    input.min = "0";
+                    input.disabled = false;
+                    input.placeholder = "Máximo 100";
 
-                valorDescontoInput.addEventListener('input', limitarPorcentagem);
-            } else if (tipoDesconto === "2") {
-                valorDescontoInput.type = "text";
-                valorDescontoInput.max = "";
-                valorDescontoInput.disabled = false;
-                valorDescontoInput.placeholder = "Ex: R$ 10,00";
+                    input.value = input.value.replace('R$', '').replace(',', '.');
 
-                function mascararReais(event) {
-                    event.target.value = aplicarMascaraReais(event.target.value);
+                    input.addEventListener('input', limitarPorcentagem); 
+                } 
+                else if (tipoDesconto === "2") {
+                    input.type = "text";
+                    input.max = "";
+                    input.disabled = false;
+                    input.placeholder = "Ex: R$ 10,00";
+
+                    function mascararReais(event) {
+                        event.target.value = aplicarMascaraReais(event.target.value);
+                    }
+
+                    input.addEventListener('input', mascararReais);
+                } else {
+                    input.disabled = true;
+                    input.placeholder = "";
                 }
-
-                valorDescontoInput.addEventListener('input', mascararReais);
-            } else {
-                valorDescontoInput.disabled = true;
-                valorDescontoInput.placeholder = "";
-            }
+            });
         });
 
-        function limitarPorcentagem(event) {
-            const valor = parseFloat(event.target.value);
-            if (valor > 100) {
-                event.target.value = 100;
-            } else if (valor < 0) {
-                event.target.value = 0;
+        tipoDescontoSelect.dispatchEvent(new Event('change'));
+    }
+
+    function criarCamposLote(tipo, quantidade) {
+        lotesContainer.innerHTML = '';
+
+        for (let i = 1; i <= quantidade; i++) {
+            const loteDiv = document.createElement('div');
+            loteDiv.classList.add('lote', 'd-flex', 'flex-column');
+            loteDiv.innerHTML = `
+                <div>
+                    <h5>Lote ${i}</h5>
+                </div>
+            `;
+
+            if (tipo === 'data') {
+                loteDiv.innerHTML += `
+                    <div class="d-flex gap-3">
+                        <div class="col-3">
+                            <label for="dataInicio${i}">Data Início:</label>
+                            <input type="date" id="dataInicio${i}" name="dataInicio${i}" class="form-control">
+                        </div>
+                        <div class="col-3 ps-2">
+                            <label for="dataFinal${i}">Data Final:</label>
+                            <input type="date" id="dataFinal${i}" name="dataFinal${i}" class="form-control">
+                        </div>
+                        <div class="col-3 ps-2">
+                            <label for="valorDesconto${i}">Valor Desconto:</label>
+                            <input type="number" id="valorDesconto${i}" name="valorDesconto${i}" class="form-control">
+                        </div>
+                    </div>
+                `;
+            } else if (tipo === 'quantidade') {
+                loteDiv.innerHTML += `
+                    <div class="d-flex">
+                        <div class="col-5">
+                            <label for="qtdVendas${i}">Quantidade de Vendas:</label>
+                            <input type="number" id="qtdVendas${i}" name="qtdVendas${i}" min="1" class="form-control">
+                        </div>
+                        <div class="col-5 ps-2">
+                            <label for="valorDesconto${i}">Valor Desconto:</label>
+                            <input type="number" id="valorDesconto${i}" name="valorDesconto${i}" class="form-control">
+                        </div>
+                    </div>
+                `;
             }
+
+            lotesContainer.appendChild(loteDiv);
         }
+
+        const dynamicDiv = document.getElementById('dynamic');
+        if (dynamicDiv) {
+            dynamicDiv.style.display = 'block';
+        }
+
+        aplicarRegrasDesconto();
+    }
+
+    tipoLote.addEventListener('change', () => {
+        const tipo = tipoLote.value;
+        const quantidade = quantidadeLotes.value;
+
+        if (quantidade) criarCamposLote(tipo, quantidade);
     });
+
+    quantidadeLotes.addEventListener('change', () => {
+        const tipo = tipoLote.value;
+        const quantidade = quantidadeLotes.value;
+
+        if (tipo) criarCamposLote(tipo, quantidade);
+    });
+});
+
 
     document.addEventListener('DOMContentLoaded', function () {
         const categorias = @json($categorias);
@@ -287,18 +302,19 @@
         const qtdLotes = document.getElementById('qtd_lotes').value;
         const tipoLote = document.getElementById('tipo_lote').value;
         const tipoDesconto = document.getElementById('tipo_desconto').value;
-        const valorDesconto = document.getElementById('valor_desconto').value;
+        const dadosLotes = capturarDadosLotes();
+        const categoriasProdutos = [];
 
-
-        function limparValor(valor) {
-            const valorLimpo = valor.replace(/[^\d,.-]/g, '').replace(',', '.');
-            return parseFloat(valorLimpo) || 0;
+        if (tipoDesconto == 1) {
+            dadosLotes.forEach(lote => {
+                if (lote.valorDesconto) {
+                    let valor = lote.valorDesconto.toString().replace(',', '.');
+                    valor = parseFloat(valor);
+                    lote.valorDesconto = isNaN(valor) ? 0 : valor.toFixed(2);
+                }
+            });
         }
 
-        const valorDescontoNumerico = limparValor(valorDesconto);
-        const dadosLotes = capturarDadosLotes();
-
-        const categoriasProdutos = [];
         document.querySelectorAll('.dynamic-row').forEach(row => {
             const categoria = row.querySelector('.categoria-select').value;
             const produto = row.querySelector('.produto-select').value;
@@ -313,7 +329,6 @@
             qtdLotes,
             tipoLote,
             tipoDesconto,
-            valorDesconto: valorDescontoNumerico,
             categoriasProdutos,
             dadosLotes,
         };
@@ -363,15 +378,23 @@
 
             const dataInicio = loteDiv.querySelector(`#dataInicio${index + 1}`);
             const dataFinal = loteDiv.querySelector(`#dataFinal${index + 1}`);
+            const qtdVendas = loteDiv.querySelector(`#qtdVendas${index + 1}`);
+            const valorDesconto = loteDiv.querySelector(`#valorDesconto${index + 1}`);
 
             if (dataInicio && dataFinal) {
                 loteData.dataInicio = dataInicio.value;
                 loteData.dataFinal = dataFinal.value;
             }
 
-            const qtdVendas = loteDiv.querySelector(`#qtdVendas${index + 1}`);
             if (qtdVendas) {
                 loteData.qtdVendas = qtdVendas.value;
+            }
+
+            if (valorDesconto) {
+                let valorStr = valorDesconto.value;
+                valorStr = valorStr.replace(/[^\d,.-]/g, '').replace(',', '.');
+                let valor = parseFloat(valorStr);
+                loteData.valorDesconto = isNaN(valor) ? 0 : valor.toFixed(2);
             }
 
             lotes.push(loteData);

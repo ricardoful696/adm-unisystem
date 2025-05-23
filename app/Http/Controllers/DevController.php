@@ -50,11 +50,18 @@ class DevController extends Controller
         return view('userDev', compact('empresas'));   
     }
 
+    public function revDevView()
+    {
+        $empresas = Empresa::all();
+        return view('revDev', compact('empresas'));   
+    }
+
     public function saveUserDev(Request $request)
     {
         $nome = $request->input('nome');
         $login = $request->input('login');
         $empresa_id = $request->input('empresa_id');
+        $tipo_usuario_id = $request->input('tipo_usuario_id');
 
         DB::beginTransaction();
         
@@ -65,7 +72,7 @@ class DevController extends Controller
             $Usuario->nome = $nome;
             $Usuario->login = $login;
             $Usuario->empresa_id = $empresa_id;
-            $Usuario->tipo_usuario_id = 2;
+            $Usuario->tipo_usuario_id = $tipo_usuario_id ;
             $Usuario->ativo = true;
           
             $Usuario->save();

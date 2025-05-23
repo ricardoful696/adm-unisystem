@@ -11,10 +11,10 @@
                 <div class="d-flex justify-content-centera align-items-center col-12">
                     <div class="d-flex flex-column col-5">
                         <div class="d-flex col-12 flex-column justify-content-center align-items-center mb-1 gap-2">
-                            <label class="text-start">Usa Voucher</label>
-                            <select class="input-style col-5 form-cont" id="useVoucher">
-                                <option value="true" {{ $config->usa_voucher == 1 ? 'selected' : '' }}>Sim</option>
-                                <option value="false" {{ $config->usa_voucher == 0 ? 'selected' : '' }}>Não</option>
+                            <label class="text-start">Ingresso Impresso</label>
+                            <select class="input-style col-5 form-cont" id="ingressoImpresso">
+                                <option value="true" {{ $config->ingresso_impresso == 1 ? 'selected' : '' }}>Sim</option>
+                                <option value="false" {{ $config->ingresso_impresso == 0 ? 'selected' : '' }}>Não</option>
                             </select>
                         </div>
                         <div class="d-flex col-12 flex-column justify-content-center align-items-center mb-1 gap-2">
@@ -96,7 +96,7 @@
             let maxVisitorBuy = $('#maxVisitorBuy').val();
             let emailValidation = $('#emailValidation').val();
             let privacyPolicy = $('#privacyPolicy').val();
-            let useVoucher = $('#useVoucher').val();
+            let ingressoImpresso = $('#ingressoImpresso').val();
             let acceptDiscountCoupon = $('#acceptDiscountCoupon').val();
             let maxDaySaleActive = $('#maxDaySaleCheckbox').prop('checked');
             let maxVisitorBuyActive = $('#maxVisitorBuyCheckbox').prop('checked');
@@ -112,7 +112,7 @@
                     maxVisitorBuyActive: maxVisitorBuyActive,
                     emailValidation: emailValidation,
                     privacyPolicy: privacyPolicy,
-                    useVoucher: useVoucher,
+                    ingressoImpresso: ingressoImpresso,
                     acceptDiscountCoupon: acceptDiscountCoupon,
                 },
                 success: function (response) {

@@ -23,7 +23,9 @@ class EfipayParametro extends Model
         'identificador_conta',
         'cartao_rota',
         'pix_rota',
-        'boleto_rota'
+        'boleto_rota',
+        'homologacao',
+        'producao'
     ];
 
     public $timestamps = false;

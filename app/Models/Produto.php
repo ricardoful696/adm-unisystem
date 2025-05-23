@@ -19,14 +19,18 @@ class Produto extends Model
         'subtitulo',
         'descricao',
         'url_capa',
-        'venda_individual',
-        'venda_combo',
         'venda_qtd_min',
         'venda_qtd_max',
         'venda_qtd_max_diaria',
-        'qtd_entrada_saida',
         'promocao',
-        'ativo'
+        'ativo',
+        'principal',
+        'qtd_entrada_saida',
+        'termos_condicoes',
+        'combo_id',
+        'bilhete',
+        'produtos_fixos_combo',
+        'promocao_id'
     ];
 
     public $timestamps = false;
@@ -59,5 +63,16 @@ class Produto extends Model
     public function loteProduto()
     {
         return $this->hasMany(LoteProduto::class, 'produto_id');
+    }
+
+    public function promocaoRelacionada()
+    {
+        return $this->belongsTo(Promocao::class, 'promocao_id');
+    }
+
+    public function combo()
+    {
+        return $this->hasMany(ComboProduto::class, 'combo_id', 'combo_id')
+                    ->with('produto'); // Carrega o produto associado
     }
 }

@@ -1,0 +1,88 @@
+.form-control{
+    border: 1px solid black !important;
+}
+.form-check-input{
+    border: 1px solid black !important;
+}
+
+.line {
+    border-top: 1px solid black;
+}
+.preco-input{
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    border: 1px solid black !important;
+}
+select {
+    border: 1px solid black;
+}
+textarea {
+    border: 1px solid black !important;
+}
+
+.form-cont{
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    border: 1px solid black !important;
+}
+.wrapper *, 
+.wrapper *::after, 
+.wrapper *::before {
+    box-sizing: border-box;
+}
+
+.dynamic {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 20px;
+}
+.nav-tabs .nav-link {
+    padding: 10px 20px;
+    font-weight: 500;
+    color: #495057;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid #0d6efd;
+    color: #0d6efd;
+}
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 3px solid #0d6efd;
+    background-color: transparent;
+}
+.tab-content {
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 0 0 4px 4px;
+    background: #fff;
+}
+.nav-item.disabled .nav-link {
+    color: #6c757d;
+    pointer-events: none;
+    cursor: not-allowed;
+}

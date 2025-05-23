@@ -17,8 +17,7 @@ class Lote extends Model
         'ativo',
         'lote_por_qtd',
         'lote_por_data',
-        'tipo_desconto_id',
-        'valor_desconto'
+        'tipo_desconto_id'
     ];
 
     public $timestamps = false; 

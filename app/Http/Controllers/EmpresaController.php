@@ -80,7 +80,7 @@ class EmpresaController extends Controller
     
         $path = $request->file('image')->store('empresa_img', 'public');
     
-        $appUrl = env('APP_URL'); 
+        $appUrl = env('DOMINIO'); 
     
         $fullPath = $appUrl . '/storage/' . $path;
     

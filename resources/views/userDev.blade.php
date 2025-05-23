@@ -30,7 +30,7 @@
             </div>
         </div>
         <div class="d-flex col-8 justify-content-end align-items-end">
-            <button type="button" id="saveUser"  class="btn btn-primary mt-4">Salvar Empresa</button>
+            <button type="button" id="saveUser"  class="btn btn-primary mt-4">Salvar Usuário</button>
         </div>
     </div>
 </div>
@@ -69,9 +69,7 @@
             var nome = $('#nome').val();
             var login = $('#login').val();
             var empresa_id = $('#empresa_id').val(); 
-            console.log(nome);
-            console.log(login);
-            console.log(empresa_id);
+            var tipo_usuario_id = 2;
 
             if (!nome || !login || !empresa_id) {
                 var errorModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
@@ -89,7 +87,8 @@
                 data: {
                     nome: nome,
                     login: login,
-                    empresa_id: empresa_id
+                    empresa_id: empresa_id,
+                    tipo_usuario_id
                 },
                 success: function(response) {
                     var successModal = new bootstrap.Modal(document.getElementById('feedbackModal'));

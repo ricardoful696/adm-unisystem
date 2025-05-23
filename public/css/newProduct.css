@@ -48,3 +48,48 @@ textarea {
 .wrapper *::before {
     box-sizing: border-box;
 }
+
+/* Ajustando o estilo da navegação */
+.nav-tabs {
+    border-bottom: 2px solid #dee2e6;
+    margin-bottom: 20px;
+}
+
+/* Estilo para as abas inativas */
+.nav-tabs .nav-link {
+    padding: 10px 20px;
+    font-weight: 500;
+    color: #6c757d; /* cor cinza para as abas inativas */
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+
+/* Efeito de hover para abas inativas */
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid #0d6efd; /* borda azul ao passar o mouse */
+    color: #0d6efd; /* cor azul ao passar o mouse */
+}
+
+/* Estilo para a aba ativa */
+.nav-tabs .nav-link.active {
+    color: #fff; /* cor branca para o texto da aba ativa */
+    background-color: #0d6efd; /* cor azul de fundo para a aba ativa */
+    border-bottom: 3px solid #0d6efd; /* borda azul para a aba ativa */
+}
+
+/* Conteúdo das abas */
+.tab-content {
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 0 0 4px 4px;
+    background: #fff;
+}
+
+/* Estilo para abas desativadas */
+.nav-item.disabled .nav-link {
+    color: #6c757d; /* cor cinza para abas desativadas */
+    pointer-events: none;
+    cursor: not-allowed;
+}

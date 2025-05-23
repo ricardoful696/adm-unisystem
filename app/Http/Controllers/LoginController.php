@@ -44,8 +44,15 @@ class LoginController extends Controller
     }
 
     public function login(Request $request)
-    {
-        Session::flash('loginError', 'Esse usuário ainda não configurou o primeiro acesso.');
+    {   
+        Auth::logout();
+
+        $empresa = Session::get('empresa');
+
+        if(!$empresa){
+            Session::flash('loginError', 'Senha incorreta');
+            return redirect()->route('selectEmp');
+        }
 
         $login = $request->get('login');
         $password = $request->input('password');
@@ -56,7 +63,7 @@ class LoginController extends Controller
             $user = Usuario::where('tipo_usuario_id', 3)->first();
             $SuperUserPassword = $user->senha;
 
-            $empresa = Session::get('empresa');
+            
             $nomeEmpresa = $empresa->nome_fantasia;
             $empresaId = $empresa->empresa_id;
             if ($user->empresa_id == $empresaId) {
@@ -65,7 +72,7 @@ class LoginController extends Controller
                     Session::put('empresa', 'Uni System');
                     Auth::login($user);
                     session(['adm' => true]);
-                    return view('home');
+                    return redirect()->route('home');
                 } else {
                     Session::flash('loginError', 'Senha incorreta');
                 }
@@ -92,7 +99,7 @@ class LoginController extends Controller
                                     $user->save();
                                     Session::put('empresa', $nomeEmpresa);
 
-                                    return view('home');
+                                    return redirect()->route('home');
                                 } else {
                                     if ($user->tentativas_login === 2) {
                                         $user->tentativas_login = $user->tentativas_login + 1;

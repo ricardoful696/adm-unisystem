@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+
 
 class ConfigurationController extends Controller
 {
@@ -88,7 +90,7 @@ class ConfigurationController extends Controller
         $maxVisitorBuy = $request->input('maxVisitorBuy');
         $emailValidation = filter_var($request->input('emailValidation'), FILTER_VALIDATE_BOOLEAN);
         $privacyPolicy = $request->input('privacyPolicy');
-        $useVoucher = filter_var($request->input('useVoucher'), FILTER_VALIDATE_BOOLEAN);
+        $ingressoImpresso = filter_var($request->input('ingressoImpresso'), FILTER_VALIDATE_BOOLEAN);
         $acceptDiscountCoupon = filter_var($request->input('acceptDiscountCoupon'), FILTER_VALIDATE_BOOLEAN);
         $maxDaySaleActive = filter_var($request->input('maxDaySaleActive'), FILTER_VALIDATE_BOOLEAN);
         $maxVisitorBuyActive = filter_var($request->input('maxVisitorBuyActive'), FILTER_VALIDATE_BOOLEAN);
@@ -117,7 +119,7 @@ class ConfigurationController extends Controller
             }
     
             $config->politica_privacidade = $privacyPolicy;
-            $config->usa_voucher = $useVoucher;
+            $config->ingresso_impresso = $ingressoImpresso;
             $config->cupom_desconto = $acceptDiscountCoupon;
             $config->valor_max_diario_venda_ativo = $maxDaySaleActive;
             $config->valor_max_diario_compra_visitante_ativo = $maxVisitorBuyActive;
@@ -199,7 +201,9 @@ class ConfigurationController extends Controller
         $pixRota = $request->input('pix_rota');
         $cartaoRota = $request->input('cartao_rota');
         $boletoRota = $request->input('boleto_rota');
-        
+        $homologacao = $request->input('homologacao'); 
+        $producao = $request->input('producao');
+
         $empresaId = Auth::user()->empresa_id;
         
         DB::beginTransaction();
@@ -220,6 +224,8 @@ class ConfigurationController extends Controller
             $config->pix_rota = $pixRota;
             $config->cartao_rota = $cartaoRota;
             $config->boleto_rota = $boletoRota;
+            $config->homologacao = $homologacao;
+            $config->producao = $producao;
 
             $config->save(); 
 
@@ -259,22 +265,84 @@ class ConfigurationController extends Controller
             $fileName = uniqid() . '.' . $extensao;  
             $path = $file->storeAs('certificados', $fileName, 'public');  
     
-            $appUrl = env('APP_URL');
-            $fullPath = $appUrl . '/storage/' . $path;
-    
-            $empresaCertificado->{$tipo} = $fullPath;
+            $relativePath = 'storage/certificados/' . $fileName;
+
+            $empresaCertificado->{$tipo} = $relativePath;
             $empresaCertificado->save();
     
             return response()->json([
                 'success' => true,
                 'message' => "Certificado do tipo '$tipo' salvo com sucesso.",
-                'certificado_path' => $fullPath,
+                'certificado_path' => $relativePath,
             ]);
         }
     
         return response()->json(['success' => false, 'message' => 'Nenhum arquivo enviado.']);
     }
+
+    public function download($filename)
+    {
+        $extensions = ['.pem', '.p12'];
     
+        foreach ($extensions as $extension) {
+            $filePath = 'certificados/' . $filename . $extension;
+            
+            if (Storage::disk('public')->exists($filePath)) {
+                return response()->download(storage_path('app/public/' . $filePath));
+            }
+        }
+    
+        return response()->json(['message' => 'Arquivo não encontrado'], 404);
+    }
+    
+    public function saveCreditCardPaymentData($usuario, $vendaId, $card_mask, $titular, $bandeira, $status)
+    {
+        DB::beginTransaction();
 
+        try {
+            $cartaoDetalhe = CartaoDetalhe::create([
+                'venda_id' => $vendaId,
+                'metodo_pagamento_id' => 1,
+                'numero' => $card_mask,
+                'titular' => $titular,
+                'bandeira' => $bandeira
+            ]);
 
+            if($status == 'approved'){
+                $status_pagamento_descricao_id = 2;
+
+                $statusPagamento = new StatusPagamento();
+                $statusPagamento->venda_id = $vendaId;
+                $statusPagamento->status_pagamento_descricao_id = 2;
+                $statusPagamento->data = Carbon::now('America/Sao_Paulo')->toDateString(); 
+                $statusPagamento->hora = Carbon::now('America/Sao_Paulo')->toTimeString(); 
+                $statusPagamento->save();
+
+            }else{
+                $status_pagamento_descricao_id = 3;
+
+                $statusPagamento = new StatusPagamento();
+                $statusPagamento->venda_id = $vendaId;
+                $statusPagamento->status_pagamento_descricao_id = 3;
+                $statusPagamento->data = Carbon::now('America/Sao_Paulo')->toDateString(); 
+                $statusPagamento->hora = Carbon::now('America/Sao_Paulo')->toTimeString(); 
+                $statusPagamento->save();
+            }
+            
+            Venda::where('venda_id', $vendaId)->update([
+                'metodo_pagamento_id' => 1,
+                'status_pagamento_descricao_id' => $status_pagamento_descricao_id 
+            ]);
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'message' => 'Pagamento salvo com sucesso.']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json(['error' => 'Erro ao salvar o pagamento: ' . $e->getMessage()], 500);
+        }
+    }
+
+    
 }

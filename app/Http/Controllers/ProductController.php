@@ -11,6 +11,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Produto;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Promocao;
+use App\Models\PromocaoCompraAntecipada;
+use App\Models\PromocaoCompreEGanhe;
+use App\Models\PromocaoDataEspecifica;
+use App\Models\PromocaoDescontoFixo;
+use App\Models\PromocaoNivel;
+use App\Models\ComboProduto;
 
 class ProductController extends Controller
 {
@@ -22,7 +30,10 @@ class ProductController extends Controller
         ->with('tipoProduto') 
         ->get();
 
-        return view('newProduct', ['categorias' => $categorias]);
+        $produtos = Produto::where('empresa_id', $empresaId)
+        ->get();
+
+        return view('newProduct', ['categorias' => $categorias, 'produtos' => $produtos]);
     }
 
     
@@ -128,14 +139,27 @@ class ProductController extends Controller
     }
     
     public function editProduct($produto_id)
-    {   
+    {
         $empresaId = Auth::user()->empresa_id;
-        $produto = Produto::findOrFail($produto_id);
-        $categorias = CategoriaProduto::where('empresa_id', $empresaId)
-        ->with('tipoProduto')
-        ->get(); 
+    
+         // Carregar o produto com todas as relações necessárias
+         $produto = Produto::with([
+            'produtoPreco',
+            'produtoPrecoDia',
+            'produtoPrecoEspecifico',
+            'combo.produto',
+            'promocaoRelacionada', 
+            'promocaoRelacionada.promocaoCompreGanhe',
+            'promocaoRelacionada.promocaoNivel',
+            'promocaoRelacionada.promocaoCompraAntecipada',
+            'promocaoRelacionada.promocaoDescontoFixo',
+            'promocaoRelacionada.promocaoDataEspecifica'
+        ])->where('empresa_id', $empresaId)->findOrFail($produto_id);
+    
+        $categorias = CategoriaProduto::where('empresa_id', $empresaId)->get();
+        $produtos = Produto::where('empresa_id', $empresaId)->where('produto_id', '!=', $produto_id)->get();
 
-        return view('editProduct', compact('produto', 'categorias'));
+        return view('editProduct', compact('produto', 'categorias', 'produtos'));
     }
 
     public function primaryProductSave(Request $request)
@@ -160,25 +184,30 @@ class ProductController extends Controller
 
     public function saveProduct(Request $request)
     {   
+        $bilhete = $request->boolean('bilhete'); 
+        $produto_fixo = $request->boolean('produto_fixo'); 
         $titulo = $request->input('titulo');
         $subtitulo = $request->input('subtitulo');
         $descricao = $request->input('descricao');
+        $termos = $request->input('termos');
         $categoria_produto_id = $request->input('categoria_produto_id');
         $url_capa = $request->input('url_capa');
-        $venda_qtd_min = $request->input('venda_qtd_min', 0); 
         $venda_qtd_max = $request->input('venda_qtd_max', 0); 
         $venda_qtd_max_diaria = $request->input('venda_qtd_max_diaria', 0); 
         $qtd_entrada_saida = $request->input('qtd_entrada_saida', 0); 
-        $venda_individual = $request->boolean('venda_individual');
-        $venda_combo = $request->boolean('venda_combo'); 
         $datasPrecosEspecificos = $request->input('datasPrecosEspecificos', []);
         $precoPorDia = $request->input('preco_por_dia', []);
         $valor_unico = $request->input('valor_unico');
+        $categoriasProdutos = json_decode($request->input('categorias_produtos'), true);
+        $promocoes = json_decode($request->input('promocoes'), true) ?? [];
+
 
         $empresaId = Auth::user()->empresa_id;
         
         try {
             DB::beginTransaction();
+
+            $comboId = uniqid();
 
             $produto = new Produto();
             $produto->categoria_produto_id = $categoria_produto_id;
@@ -186,18 +215,39 @@ class ProductController extends Controller
             $produto->titulo = $titulo;
             $produto->subtitulo = $subtitulo;
             $produto->descricao = $descricao;
+            $produto->termos_condicoes = $termos;
             $produto->url_capa = $url_capa;
             $produto->ativo = true;
-            $produto->venda_combo = $venda_combo;
-            $produto->venda_qtd_min = $venda_qtd_min;
             $produto->venda_qtd_max = $venda_qtd_max;
             $produto->venda_qtd_max_diaria = $venda_qtd_max_diaria;
             $produto->qtd_entrada_saida = $qtd_entrada_saida;
             $produto->promocao = false;
-            $produto->venda_individual = $venda_individual;
             $produto->principal = false;
-            
+            $produto->combo_id = $comboId;
+            $produto->bilhete = $bilhete;
+            $produto->produtos_fixos_combo = $produto_fixo;
+            $produto->principal = false;
+            $produto->promocao_id = null;
+
             $produto->save();
+
+            if ($request->hasFile('capa')) {
+                $file = $request->file('capa');
+                $uniqueId = uniqid(); // Gera um ID único
+                $filename = $uniqueId . '.' . $file->getClientOriginalExtension(); 
+
+                // Armazena o arquivo na pasta "public/produtos" do disco público
+                $path = Storage::disk('public')->putFileAs('produtos', $file, $filename);
+
+                // Gera a URL correta para o arquivo público
+                $urlCapa = asset('storage/produtos/' . $filename);
+
+                // Salva a URL no banco de dados
+                $produto->url_capa = $urlCapa;
+                $produto->save();
+            }
+
+            
 
             if(!$valor_unico){
                 foreach ($datasPrecosEspecificos as $dataPreco) {
@@ -241,7 +291,82 @@ class ProductController extends Controller
                 
                 $produtoPreco->save();
             }
-            
+
+            foreach ($categoriasProdutos as $item) {
+                $comboProduto = new ComboProduto();
+                $comboProduto->combo_id = $comboId;
+                $comboProduto->produto_id = $item['produto_id'];
+                $comboProduto->qtd_produto = $item['quantidade'] ?? 1;
+                $comboProduto->save();
+            }
+
+            foreach ($promocoes as $promocaoData) {
+                $promocaoTipoId = $promocaoData['promocao_tipo_id'];
+    
+                $promocao = new Promocao();
+                $promocao->promocao_tipo_id = $promocaoTipoId;
+                $promocao->data_inicio = $promocaoData['data_inicio']; 
+                $promocao->data_final = $promocaoData['data_fim']; 
+                $promocao->nome = $promocaoData['nome_promocao'];
+                $promocao->descricao = $promocaoData['descricao_promocao'];
+                $promocao->maximo_disponivel = $promocaoData['maximo_disponivel'];
+                $promocao->ativo = true;
+                $promocao->save();
+                
+
+                $produto->promocao_id = $promocao->promocao_id;
+                $produto->promocao = true; 
+                $produto->save();
+
+                // Salva os detalhes específicos de cada tipo de promoção
+                if ($promocaoTipoId === '1') { // Promoção por Nível
+                    foreach ($promocaoData['niveis'] as $nivel) {
+                        $promocaoNivel = new PromocaoNivel();
+                        $promocaoNivel->promocao_id = $promocao->promocao_id;
+                        $promocaoNivel->quantidade_min = $nivel['quantidade_min'];
+                        $promocaoNivel->quantidade_max = $nivel['quantidade_max'];
+                        $promocaoNivel->desconto_percentual = $nivel['desconto_percentual'];
+                        $promocaoNivel->save();
+                    }
+                } elseif ($promocaoTipoId === '2') { // Compre e Ganhe
+                    foreach ($promocaoData['compre_ganhe'] as $item) {
+                        $promocaoCompreGanhe = new PromocaoCompreEGanhe();
+                        $promocaoCompreGanhe->promocao_id = $promocao->promocao_id;
+                        $promocaoCompreGanhe->quantidade_compra = $item['quantidade_comprada'];
+                        $promocaoCompreGanhe->quantidade_gratis = $item['quantidade_gratis'];
+                        $promocaoCompreGanhe->produto_id_gratis = $item['produto_id_ganho'];
+                        $promocaoCompreGanhe->save();
+                    }
+                } elseif ($promocaoTipoId === '3') { // Compra Antecipada
+                    foreach ($promocaoData['antecipadas'] as $antecipada) {
+                        $promocaoAntecipada = new PromocaoCompraAntecipada();
+                        $promocaoAntecipada->promocao_id = $promocao->promocao_id;
+                        $promocaoAntecipada->dias_antecedencia_min = $antecipada['dias_antecedencia_min'];
+                        $promocaoAntecipada->dias_antecedencia_max = $antecipada['dias_antecedencia_max'];
+                        $promocaoAntecipada->desconto_percentual = $antecipada['desconto_percentual'];
+                        $promocaoAntecipada->save();
+                    }
+                } elseif ($promocaoTipoId === '4') { // Desconto Fixo
+                    foreach ($promocaoData['descontos_fixos'] as $desconto) {
+                        $promocaoDescontoFixo = new PromocaoDescontoFixo();
+                        $promocaoDescontoFixo->promocao_id = $promocao->promocao_id;
+                        $promocaoDescontoFixo->quantidade_min = $desconto['quantidade_min'];
+                        $promocaoDescontoFixo->desconto_percentual = $desconto['desconto_percentual'];
+                        $promocaoDescontoFixo->save();
+                    }
+                } elseif ($promocaoTipoId === '5') { // Data Específica
+                    foreach ($promocaoData['data_especificas'] as $dataEspecifica) {
+                        $promocaoDataEspecifica = new PromocaoDataEspecifica();
+                        $promocaoDataEspecifica->promocao_id = $promocao->promocao_id;
+                        $promocaoDataEspecifica->dias_antecedencia_min = $dataEspecifica['dias_antecedencia_min'];
+                        $promocaoDataEspecifica->dias_antecedencia_max = $dataEspecifica['dias_antecedencia_max'];
+                        $promocaoDataEspecifica->desconto_percentual = $dataEspecifica['desconto_percentual'];
+                        $promocaoDataEspecifica->data_especifica = $promocaoData['data_evento'];
+                        $promocaoDataEspecifica->save();
+                    }
+                }
+            }
+
             DB::commit();
 
             return response()->json([
@@ -366,57 +491,201 @@ class ProductController extends Controller
         }
     }
     public function productUpdate(Request $request)
-    {   
-        $produtoId = $request->input('produtoId');
-
-        $produto = Produto::where('produto_id', $produtoId)->first();
+    {
+        $produtoId = $request->input('produto_id');
+        $produto = Produto::where('produto_id', $produtoId)->firstOrFail();
 
         $titulo = $request->input('titulo');
         $subtitulo = $request->input('subtitulo');
         $descricao = $request->input('descricao');
+        $termos = $request->input('termos');
         $categoria_produto_id = $request->input('categoria_produto_id');
-        $url_capa = $request->input('url_capa');
-        $venda_qtd_min = $request->input('venda_qtd_min', 0); 
         $venda_qtd_max = $request->input('venda_qtd_max', 0); 
         $venda_qtd_max_diaria = $request->input('venda_qtd_max_diaria', 0); 
-        $venda_individual = $request->boolean('venda_individual');
-        $venda_combo = $request->boolean('venda_combo'); 
-        
+        $qtd_entrada_saida = $request->input('qtd_entrada_saida', 0); 
+        $bilhete = $request->boolean('bilhete');
+        $produto_fixo = $request->boolean('produto_fixo');
+        $valor_unico = $request->input('valor_unico');
+        $datasPrecosEspecificos = $request->input('datasPrecosEspecificos', []);
+        $precoPorDia = $request->input('preco_por_dia', []);
+        $categoriasProdutos = json_decode($request->input('categorias_produtos'), true);
+        $promocoes = json_decode($request->input('promocoes'), true) ?? [];
+
         try {
             DB::beginTransaction();
 
+            // Atualiza os dados do produto
             $produto->categoria_produto_id = $categoria_produto_id;
             $produto->titulo = $titulo;
             $produto->subtitulo = $subtitulo;
             $produto->descricao = $descricao;
-            $produto->url_capa = $url_capa;
-            $produto->ativo = true;
-            $produto->venda_combo = $venda_combo;
-            $produto->venda_qtd_min = $venda_qtd_min;
+            $produto->termos_condicoes = $termos;
             $produto->venda_qtd_max = $venda_qtd_max;
             $produto->venda_qtd_max_diaria = $venda_qtd_max_diaria;
-            $produto->promocao = false;
-            $produto->venda_individual = $venda_individual;
-            $produto->principal = false;
-            
-            
+            $produto->qtd_entrada_saida = $qtd_entrada_saida;
+            $produto->bilhete = $bilhete;
+            $produto->produtos_fixos_combo = $produto_fixo;
+            $produto->ativo = true;
             $produto->save();
+
+            // Atualiza imagem se necessário
+            if ($request->hasFile('capa')) {
+                $file = $request->file('capa');
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+                Storage::disk('public')->putFileAs('produtos', $file, $filename);
+                $produto->url_capa = asset('storage/produtos/' . $filename);
+                $produto->save();
+            }
+
+            // Remove preços antigos
+            ProdutoPrecoEspecifico::where('produto_id', $produtoId)->delete();
+            ProdutoPrecoDia::where('produto_id', $produtoId)->delete();
+            ProdutoPreco::where('produto_id', $produtoId)->delete();
+
+            // Adiciona os novos preços
+            if (!$valor_unico) {
+                foreach ($datasPrecosEspecificos as $dataPreco) {
+                    $dataInicio = \Carbon\Carbon::parse($dataPreco['data_inicio']);
+                    $dataFim = \Carbon\Carbon::parse($dataPreco['data_fim']);
+                    $preco = $dataPreco['preco'];
+
+                    while ($dataInicio <= $dataFim) {
+                        ProdutoPrecoEspecifico::create([
+                            'produto_id' => $produtoId,
+                            'data' => $dataInicio->format('Y-m-d'),
+                            'valor' => $preco
+                        ]);
+                        $dataInicio->addDay();
+                    }
+                }
+
+                foreach ($precoPorDia as $dia => $preco) {
+                    ProdutoPrecoDia::create([
+                        'produto_id' => $produtoId,
+                        'dia_semana' => $dia,
+                        'valor' => $preco,
+                        'ativo' => !is_null($preco)
+                    ]);
+                }
+            } else {
+                ProdutoPreco::create([
+                    'produto_id' => $produtoId,
+                    'valor' => $valor_unico,
+                    'valor_promocional' => null
+                ]);
+            }
+
+            // Atualiza combo se houver
+            ComboProduto::where('combo_id', $produto->combo_id)->delete();
+            foreach ($categoriasProdutos as $item) {
+                ComboProduto::create([
+                    'combo_id' => $produto->combo_id,
+                    'produto_id' => $item['produto_id'],
+                    'qtd_produto' => $item['quantidade'] ?? 1
+                ]);
+            }
+
+            if ($produto->promocao_id) {
+                $promocaoId = $produto->promocao_id;
+            
+                PromocaoNivel::where('promocao_id', $promocaoId)->delete();
+                PromocaoCompreEGanhe::where('promocao_id', $promocaoId)->delete();
+                PromocaoCompraAntecipada::where('promocao_id', $promocaoId)->delete();
+                PromocaoDescontoFixo::where('promocao_id', $promocaoId)->delete();
+                PromocaoDataEspecifica::where('promocao_id', $promocaoId)->delete();
+            
+                Promocao::where('promocao_id', $promocaoId)->delete();
+            
+                $produto->promocao_id = null;
+                $produto->promocao = false;
+                $produto->save();
+            }
+            
+            if (!empty($promocoes)) {
+                foreach ($promocoes as $promocaoData) {
+                    $promocaoTipoId = $promocaoData['promocao_tipo_id'];
+        
+                    $promocao = new Promocao();
+                    $promocao->promocao_tipo_id = $promocaoTipoId;
+                    $promocao->data_inicio = $promocaoData['data_inicio']; 
+                    $promocao->data_final = $promocaoData['data_fim']; 
+                    $promocao->nome = $promocaoData['nome_promocao'];
+                    $promocao->descricao = $promocaoData['descricao_promocao'];
+                    $promocao->maximo_disponivel = $promocaoData['maximo_disponivel'];
+                    $promocao->ativo = true;
+                    $promocao->save();
+                    
+
+                    $produto->promocao_id = $promocao->promocao_id;
+                    $produto->promocao = true; 
+                    $produto->save();
+
+                    // Salva os detalhes específicos de cada tipo de promoção
+                    if ($promocaoTipoId === '1') { // Promoção por Nível
+                        foreach ($promocaoData['niveis'] as $nivel) {
+                            $promocaoNivel = new PromocaoNivel();
+                            $promocaoNivel->promocao_id = $promocao->promocao_id;
+                            $promocaoNivel->quantidade_min = $nivel['quantidade_min'];
+                            $promocaoNivel->quantidade_max = $nivel['quantidade_max'];
+                            $promocaoNivel->desconto_percentual = $nivel['desconto_percentual'];
+                            $promocaoNivel->save();
+                        }
+                    } elseif ($promocaoTipoId === '2') { // Compre e Ganhe
+                        foreach ($promocaoData['compre_ganhe'] as $item) {
+                            $promocaoCompreGanhe = new PromocaoCompreEGanhe();
+                            $promocaoCompreGanhe->promocao_id = $promocao->promocao_id;
+                            $promocaoCompreGanhe->quantidade_compra = $item['quantidade_comprada'];
+                            $promocaoCompreGanhe->quantidade_gratis = $item['quantidade_gratis'];
+                            $promocaoCompreGanhe->produto_id_gratis = $item['produto_id_ganho'];
+                            $promocaoCompreGanhe->save();
+                        }
+                    } elseif ($promocaoTipoId === '3') { // Compra Antecipada
+                        foreach ($promocaoData['antecipadas'] as $antecipada) {
+                            $promocaoAntecipada = new PromocaoCompraAntecipada();
+                            $promocaoAntecipada->promocao_id = $promocao->promocao_id;
+                            $promocaoAntecipada->dias_antecedencia_min = $antecipada['dias_antecedencia_min'];
+                            $promocaoAntecipada->dias_antecedencia_max = $antecipada['dias_antecedencia_max'];
+                            $promocaoAntecipada->desconto_percentual = $antecipada['desconto_percentual'];
+                            $promocaoAntecipada->save();
+                        }
+                    } elseif ($promocaoTipoId === '4') { // Desconto Fixo
+                        foreach ($promocaoData['descontos_fixos'] as $desconto) {
+                            $promocaoDescontoFixo = new PromocaoDescontoFixo();
+                            $promocaoDescontoFixo->promocao_id = $promocao->promocao_id;
+                            $promocaoDescontoFixo->quantidade_min = $desconto['quantidade_min'];
+                            $promocaoDescontoFixo->desconto_percentual = $desconto['desconto_percentual'];
+                            $promocaoDescontoFixo->save();
+                        }
+                    } elseif ($promocaoTipoId === '5') { // Data Específica
+                        foreach ($promocaoData['data_especificas'] as $dataEspecifica) {
+                            $promocaoDataEspecifica = new PromocaoDataEspecifica();
+                            $promocaoDataEspecifica->promocao_id = $promocao->promocao_id;
+                            $promocaoDataEspecifica->dias_antecedencia_min = $dataEspecifica['dias_antecedencia_min'];
+                            $promocaoDataEspecifica->dias_antecedencia_max = $dataEspecifica['dias_antecedencia_max'];
+                            $promocaoDataEspecifica->desconto_percentual = $dataEspecifica['desconto_percentual'];
+                            $promocaoDataEspecifica->data_especifica = $dataEspecifica['data_evento'];
+                            $promocaoDataEspecifica->save();
+                        }
+                    }
+                }
+            }
 
             DB::commit();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Produto editado com sucesso!',
+                'message' => 'Produto atualizado com sucesso!',
                 'produto' => $produto
-            ], 201);
+            ], 200);
+
         } catch (\Exception $e) {
             DB::rollBack();
-
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao editar o produto: ' . $e->getMessage()
+                'message' => 'Erro ao atualizar o produto: ' . $e->getMessage()
             ], 500);
         }
     }
+
 
 }

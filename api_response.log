@@ -1,0 +1,14 @@
+OPTIONS Response:
+Array
+(
+    [status] => 204
+    [response] => 
+)
+
+
+POST Response:
+Array
+(
+    [status] => 201
+    [response] => Registro criado com sucesso.
+)
