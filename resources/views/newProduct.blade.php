@@ -328,22 +328,6 @@ function togglePromotionsTab() {
         $('#info-tab').addClass('active');
         $('#info').addClass('show active');
     }
-    const produtosFixosChecked = $('#produto_fixo').is(':checked');
-    const promotionsTabLi = $('#prices-tab-li');
-    const promotionsTab = $('#prices-tab');
-     if (produtosFixosChecked) {
-        promotionsTabLi.removeClass('disabled');
-        promotionsTab.attr('data-bs-toggle', 'tab');
-    } else {
-        promotionsTabLi.addClass('disabled');
-        promotionsTab.removeAttr('data-bs-toggle');
-        // Remove as classes 'active' e 'show' da aba de promoções e seu conteúdo
-        promotionsTab.removeClass('active');
-        $('#promotions').removeClass('show active');
-        // Ativa a aba de informações
-        $('#info-tab').addClass('active');
-        $('#info').addClass('show active');
-    }
 
 
 }
