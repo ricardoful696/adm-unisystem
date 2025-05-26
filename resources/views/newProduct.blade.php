@@ -767,6 +767,12 @@ $(document).ready(function () {
             $('#info-tab').tab('show');
         }
 
+        if ($('#descricao').val().trim() === '') {
+            formValid = false;
+            showError('#descricao', 'O campo descrição é obrigatório.');
+            $('#info-tab').tab('show');
+        }
+
         if ($('#termos_condicoes').val().trim() === '') {
             formValid = false;
             showError('#termos_condicoes', 'O campo termos e condições é obrigatório.');
