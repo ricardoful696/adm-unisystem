@@ -247,48 +247,58 @@ class ProductController extends Controller
                 $produto->save();
             }
 
+            if($produto_fixo) {
+
+                if(!$valor_unico){
+                    foreach ($datasPrecosEspecificos as $dataPreco) {
+                        $dataInicio = \Carbon\Carbon::parse($dataPreco['data_inicio']);
+                        $dataFim = \Carbon\Carbon::parse($dataPreco['data_fim']);
+                        $preco = $dataPreco['preco'];
+    
+                        $currentDate = $dataInicio;
+    
+                        while ($currentDate <= $dataFim) {
+                            $produtoPrecoEspecifico = new ProdutoPrecoEspecifico();
+                            $produtoPrecoEspecifico->produto_id = $produto->produto_id;
+                            $produtoPrecoEspecifico->data = $currentDate->format('Y-m-d'); 
+                            $produtoPrecoEspecifico->valor = $preco; 
+                            $produtoPrecoEspecifico->save();
             
-
-            if(!$valor_unico){
-                foreach ($datasPrecosEspecificos as $dataPreco) {
-                    $dataInicio = \Carbon\Carbon::parse($dataPreco['data_inicio']);
-                    $dataFim = \Carbon\Carbon::parse($dataPreco['data_fim']);
-                    $preco = $dataPreco['preco'];
-
-                    $currentDate = $dataInicio;
-
-                    while ($currentDate <= $dataFim) {
-                        $produtoPrecoEspecifico = new ProdutoPrecoEspecifico();
-                        $produtoPrecoEspecifico->produto_id = $produto->produto_id;
-                        $produtoPrecoEspecifico->data = $currentDate->format('Y-m-d'); 
-                        $produtoPrecoEspecifico->valor = $preco; 
-                        $produtoPrecoEspecifico->save();
-        
-                        $currentDate->addDay();
+                            $currentDate->addDay();
+                        }
                     }
-                }
-        
-                foreach ($precoPorDia as $dia => $preco) {
-                    $ativo = true;
+            
+                    foreach ($precoPorDia as $dia => $preco) {
+                        $ativo = true;
+                        
+                        if (is_null($preco)) {
+                            $ativo = false;
+                        }
+    
+                        $produtoPrecoDia = new ProdutoPrecoDia();
+                        $produtoPrecoDia->produto_id = $produto->produto_id;
+                        $produtoPrecoDia->dia_semana = $dia;
+                        $produtoPrecoDia->valor = $preco;
+                        $produtoPrecoDia->ativo = $ativo;
+    
+                        $produtoPrecoDia->save();
+                    }
+                }else {
+                    $produtoPreco = new ProdutoPreco();
+                    $produtoPreco->produto_id = $produto->produto_id;
+                    $produtoPreco->valor = $valor_unico;
+                    $produtoPreco->valor_promocional = null;
                     
-                    if (is_null($preco)) {
-                        $ativo = false;
-                    }
+                    $produtoPreco->save();
 
-                    $produtoPrecoDia = new ProdutoPrecoDia();
-                    $produtoPrecoDia->produto_id = $produto->produto_id;
-                    $produtoPrecoDia->dia_semana = $dia;
-                    $produtoPrecoDia->valor = $preco;
-                    $produtoPrecoDia->ativo = $ativo;
-
-                    $produtoPrecoDia->save();
                 }
-            }else {
+
+            } else {
                 $produtoPreco = new ProdutoPreco();
                 $produtoPreco->produto_id = $produto->produto_id;
-                $produtoPreco->valor = $valor_unico;
+                $produtoPreco->valor = null;
                 $produtoPreco->valor_promocional = null;
-                
+                    
                 $produtoPreco->save();
             }
 

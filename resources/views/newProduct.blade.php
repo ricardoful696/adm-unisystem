@@ -791,6 +791,18 @@ $(document).ready(function () {
             $('#info-tab').tab('show');
         }
 
+        if ($('#qtd_entrada_saida').val().trim() === '') {
+            formValid = false;
+            showError('#qtd_entrada_saida', 'O campo quantidade de entrada e saída é obrigatório.');
+            $('#info-tab').tab('show');
+        }
+
+        if ($('#preco_unico').is(':checked') && $('#valor_unico').val().trim() === '') {
+            formValid = false;
+            showError('#valor_unico', 'O campo valor único é obrigatório.');
+            $('#prices-tab').tab('show');
+        }
+
         const categoriasProdutos = [];
         document.querySelectorAll('.dynamic-row').forEach(row => {
             const categoria = row.querySelector('.categoria-select').value;
