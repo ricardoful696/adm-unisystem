@@ -122,7 +122,7 @@
 
             <!-- Aba 3: Preços -->
             <div class="tab-pane fade" id="prices" role="tabpanel" aria-labelledby="prices-tab">
-                <div class="d-flex gap-3 flex-column justify-content-center mt-4">
+                <div class="d-flex gap-3 flex-column justify-content-center mt-4" id="prices-content">
                     <div>
                         <div class="form-check my-3">
                             <input type="checkbox" name="preco_unico" id="preco_unico" class="form-check-input">
@@ -863,7 +863,7 @@ $(document).ready(function () {
             if (!temPrecoPorData && !temPrecoPorDia) {
                 formValid = false;
                 showError(
-                    '#prices',
+                    '#prices-content',
                     'Preencha pelo menos um preço por data específica ou um preço por dia da semana ativo.'
                 );
                 $('#prices-tab').tab('show');
