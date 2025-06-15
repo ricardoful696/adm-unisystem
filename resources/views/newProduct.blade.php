@@ -333,25 +333,25 @@ function togglePromotionsTab() {
 }
 // Função para habilitar/desabilitar a aba de preços com base no checkbox "Produto Fixo"
 function togglePricesTab() {
-        const produtoFixoChecked = $('#produto_fixo').is(':checked');
-        const pricesTabLi = $('#prices-tab-li');
-        const pricesTab = $('#prices-tab');
+    const produtoFixoChecked = $('#produto_fixo').is(':checked');
+    const pricesTabLi = $('#prices-tab-li');
+    const pricesTab = $('#prices-tab');
 
-        if (produtoFixoChecked) {
-            pricesTabLi.removeClass('disabled');
-            pricesTab.removeClass('disabled');
-        } else {
-            pricesTabLi.addClass('disabled');
-            pricesTab.addClass('disabled');
+    if (produtoFixoChecked) {
+        pricesTabLi.removeClass('disabled');
+        pricesTab.removeClass('disabled');
+    } else {
+        pricesTabLi.addClass('disabled');
+        pricesTab.addClass('disabled');
 
-            pricesTab.removeClass('active');
-            $('#prices').removeClass('show active');
+        pricesTab.removeClass('active');
+        $('#prices').removeClass('show active');
 
-            // Volta para a aba info
-            $('#info-tab').addClass('active');
-            $('#info').addClass('show active');
-        }
+        // Volta para a aba info
+        $('#info-tab').addClass('active');
+        $('#info').addClass('show active');
     }
+}
 
 
 // Função para renderizar os campos dinâmicos com base no tipo de promoção
