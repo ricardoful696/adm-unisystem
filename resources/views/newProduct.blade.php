@@ -879,42 +879,44 @@ $(document).ready(function () {
             }
         }
 
-        if ($('#preco_unico').is(':checked') && $('#valor_unico').val().trim() === '') {
-            formValid = false;
-            showError('#valor_unico', 'O campo valor único é obrigatório.');
-            $('#prices-tab').tab('show');
-        } else if (!$('#preco_unico').is(':checked')) {
-            let temPrecoPorData = false;
-            let temPrecoPorDia = false;
-
-            // Verifica preços por datas específicas
-            $('#precos-especificos .d-flex').each(function () {
-                const dataInicio = $(this).find('input[name="data_inicio[]"]').val();
-                const dataFim = $(this).find('input[name="data_fim[]"]').val();
-                const preco = $(this).find('input[name="precos_especificos[]"]').val();
-
-                if (dataInicio && dataFim && preco && parseFloat(preco) > 0) {
-                    temPrecoPorData = true;
-                }
-            });
-
-            // Verifica preços dos dias ativos
-            $('.checkbox-dia:checked').each(function () {
-                const inputPreco = $(this).closest('.d-flex').find('.preco-input');
-
-                if (inputPreco.val() && parseFloat(inputPreco.val()) > 0) {
-                    temPrecoPorDia = true;
-                }
-            });
-
-            // Se nenhum dos dois estiver preenchido corretamente, gera erro
-            if (!temPrecoPorData && !temPrecoPorDia) {
+        if ($('#produto_fixo').is(':checked')) {
+            if ($('#preco_unico').is(':checked') && $('#valor_unico').val().trim() === '') {
                 formValid = false;
-                showError(
-                    '#prices-content',
-                    'Preencha pelo menos um preço por data específica ou um preço por dia da semana ativo.'
-                );
+                showError('#valor_unico', 'O campo valor único é obrigatório.');
                 $('#prices-tab').tab('show');
+            } else if (!$('#preco_unico').is(':checked')) {
+                let temPrecoPorData = false;
+                let temPrecoPorDia = false;
+
+                // Verifica preços por datas específicas
+                $('#precos-especificos .d-flex').each(function () {
+                    const dataInicio = $(this).find('input[name="data_inicio[]"]').val();
+                    const dataFim = $(this).find('input[name="data_fim[]"]').val();
+                    const preco = $(this).find('input[name="precos_especificos[]"]').val();
+
+                    if (dataInicio && dataFim && preco && parseFloat(preco) > 0) {
+                        temPrecoPorData = true;
+                    }
+                });
+
+                // Verifica preços dos dias ativos
+                $('.checkbox-dia:checked').each(function () {
+                    const inputPreco = $(this).closest('.d-flex').find('.preco-input');
+
+                    if (inputPreco.val() && parseFloat(inputPreco.val()) > 0) {
+                        temPrecoPorDia = true;
+                    }
+                });
+
+                // Se nenhum dos dois estiver preenchido corretamente, gera erro
+                if (!temPrecoPorData && !temPrecoPorDia) {
+                    formValid = false;
+                    showError(
+                        '#prices-content',
+                        'Preencha pelo menos um preço por data específica ou um preço por dia da semana ativo.'
+                    );
+                    $('#prices-tab').tab('show');
+                }
             }
         }
 
