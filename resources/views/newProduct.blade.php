@@ -831,6 +831,54 @@ $(document).ready(function () {
             $('#info-tab').tab('show');
         }
 
+        // Validação dos produtos adicionados
+        const linhasProdutos = $('#dynamicFields .dynamic-row');
+
+        if (linhasProdutos.length > 0) {
+            let produtosValidos = true;
+
+            linhasProdutos.each(function () {
+                const categoriaSelect = $(this).find('select[name="categoria_produto_id[]"]');
+                const produtoSelect = $(this).find('select[name="produto_id[]"]');
+
+                const categoriaSelecionada = categoriaSelect.val();
+                const produtoSelecionado = produtoSelect.val();
+
+                // Valida Categoria
+                if (!categoriaSelecionada || categoriaSelecionada === '') {
+                    produtosValidos = false;
+
+                    categoriaSelect.addClass('is-invalid');
+
+                    if (categoriaSelect.next('.invalid-feedback').length === 0) {
+                        categoriaSelect.after('<div class="invalid-feedback">Selecione uma categoria ou remova a linha.</div>');
+                    }
+                } else {
+                    categoriaSelect.removeClass('is-invalid');
+                    categoriaSelect.next('.invalid-feedback').remove();
+                }
+
+                // Valida Produto
+                if (!produtoSelecionado || produtoSelecionado === '') {
+                    produtosValidos = false;
+
+                    produtoSelect.addClass('is-invalid');
+
+                    if (produtoSelect.next('.invalid-feedback').length === 0) {
+                        produtoSelect.after('<div class="invalid-feedback">Selecione um produto ou remova a linha.</div>');
+                    }
+                } else {
+                    produtoSelect.removeClass('is-invalid');
+                    produtoSelect.next('.invalid-feedback').remove();
+                }
+            });
+
+            if (!produtosValidos) {
+                formValid = false;
+                $('#products-tab').tab('show');
+            }
+        }
+
         if ($('#preco_unico').is(':checked') && $('#valor_unico').val().trim() === '') {
             formValid = false;
             showError('#valor_unico', 'O campo valor único é obrigatório.');
