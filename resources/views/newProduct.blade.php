@@ -331,6 +331,28 @@ function togglePromotionsTab() {
 
 
 }
+// Função para habilitar/desabilitar a aba de preços com base no checkbox "Produto Fixo"
+function togglePricesTab() {
+        const produtoFixoChecked = $('#produto_fixo').is(':checked');
+        const pricesTabLi = $('#prices-tab-li');
+        const pricesTab = $('#prices-tab');
+
+        if (produtoFixoChecked) {
+            pricesTabLi.removeClass('disabled');
+            pricesTab.removeClass('disabled');
+        } else {
+            pricesTabLi.addClass('disabled');
+            pricesTab.addClass('disabled');
+
+            pricesTab.removeClass('active');
+            $('#prices').removeClass('show active');
+
+            // Volta para a aba info
+            $('#info-tab').addClass('active');
+            $('#info').addClass('show active');
+        }
+    }
+
 
 // Função para renderizar os campos dinâmicos com base no tipo de promoção
 function renderPromocaoFields(tipoId) {
@@ -511,6 +533,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Inicializa o estado da aba de promoções
     togglePromotionsTab();
+    togglePricesTab();
+
 });
 
 document.addEventListener('click', function (e) {
@@ -568,11 +592,21 @@ document.getElementById('dynamicFields').addEventListener('change', function (ev
 $(document).ready(function () {
     // Listener para o checkbox "bilhete"
     $('#bilhete').on('change', togglePromotionsTab);
+    $('#produto_fixo').on('change', togglePricesTab);
 
     // Listener para o select de tipo de promoção
     $('#promocao_tipo').on('change', function () {
         const tipoId = $(this).val();
         renderPromocaoFields(tipoId);
+    });
+
+    // Previne clique em abas desabilitadas
+    $('.nav-link').on('click', function (e) {
+        if ($(this).parent().hasClass('disabled')) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
+        }
     });
 
     // Listeners para adicionar/remover linhas dinâmicas
