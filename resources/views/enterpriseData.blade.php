@@ -125,13 +125,63 @@
 
 @include('masks.footer')
 
+<style>
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+    }
+</style>
+
 <script>
     $(document).ready(function () {
         $('#salvarAlteracoes').click(function (e) {
             e.preventDefault();
 
-            let dados = {
-                ativo: $('#ativo').is(':checked'),
+            $('.error-message').remove(); // Limpa mensagens de erro anteriores
+
+            const isAtivo = $('#ativo').is(':checked');
+            let isValid = true;
+
+            const camposObrigatorios = [
+                { id: 'nome', label: 'Nome da Empresa' },
+                { id: 'nome_fantasia', label: 'Nome Fantasia' },
+                { id: 'cnpj', label: 'CNPJ' },
+                { id: 'telefone1', label: 'Telefone 1' },
+                { id: 'email', label: 'Email' },
+                { id: 'cep', label: 'CEP' },
+                { id: 'estado', label: 'Estado' },
+                { id: 'cidade', label: 'Cidade' },
+                { id: 'endereco', label: 'Endereço' },
+                { id: 'endereco_numero', label: 'Número' },
+            ];
+
+            // Se estiver ativo, valida campos obrigatórios
+            if (isAtivo) {
+                camposObrigatorios.forEach(field => {
+                    const valor = $(`#${field.id}`).val().trim();
+                    if (!valor) {
+                        isValid = false;
+                        $(`#${field.id}`).after(`<div class="error-message">O campo ${field.label} é obrigatório.</div>`);
+                    }
+                });
+
+                const email = $('#email').val().trim();
+                if (email && !isValidEmail(email)) {
+                    isValid = false;
+                    $('#email').after(`<div class="error-message">Digite um e-mail válido.</div>`);
+                }
+
+                const cnpj = $('#cnpj').val().trim();
+                if (cnpj && !isValidCNPJ(cnpj)) {
+                    isValid = false;
+                    $('#cnpj').after(`<div class="error-message">CNPJ inválido.</div>`);
+                }
+            }
+
+            if (!isValid) return; // Interrompe o envio se houver erro
+
+            const dados = {
+                ativo: isAtivo,
                 nome: $('#nome').val(),
                 nome_fantasia: $('#nome_fantasia').val(),
                 cnpj: $('#cnpj').val(),
@@ -156,10 +206,10 @@
                 method: 'POST',
                 data: dados,
                 success: function (response) {
-                    if (response.message) { // Verifica a existência da mensagem no JSON retornado
+                    if (response.message) {
                         showModal(response.message, 'success');
                     } else {
-                        showModal('Erro desconhecido ao salvar o produto.', 'error');
+                        showModal('Erro desconhecido ao salvar os dados.', 'error');
                     }
                 },
                 error: function (xhr, status, error) {
@@ -181,7 +231,7 @@
                 modalTitle.innerText = 'Sucesso';
                 modalTitle.classList.remove('text-danger');
                 modalTitle.classList.add('text-success');
-            } else if (type === 'error') {
+            } else {
                 modalTitle.innerText = 'Erro';
                 modalTitle.classList.remove('text-success');
                 modalTitle.classList.add('text-danger');
@@ -189,6 +239,43 @@
 
             const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
             feedbackModal.show();
+        }
+
+        function isValidEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
+        function isValidCNPJ(cnpj) {
+            // cnpj = cnpj.replace(/[^\d]+/g, '');
+            // if (cnpj === '') return false;
+            // if (cnpj.length !== 14) return false;
+            // if (/^(\d)\1+$/.test(cnpj)) return false;
+
+            // let tamanho = cnpj.length - 2;
+            // let numeros = cnpj.substring(0, tamanho);
+            // let digitos = cnpj.substring(tamanho);
+            // let soma = 0;
+            // let pos = tamanho - 7;
+            // for (let i = tamanho; i >= 1; i--) {
+            //     soma += numeros.charAt(tamanho - i) * pos--;
+            //     if (pos < 2) pos = 9;
+            // }
+            // let resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+            // if (resultado !== parseInt(digitos.charAt(0))) return false;
+
+            // tamanho = tamanho + 1;
+            // numeros = cnpj.substring(0, tamanho);
+            // soma = 0;
+            // pos = tamanho - 7;
+            // for (let i = tamanho; i >= 1; i--) {
+            //     soma += numeros.charAt(tamanho - i) * pos--;
+            //     if (pos < 2) pos = 9;
+            // }
+            // resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
+            // if (resultado !== parseInt(digitos.charAt(1))) return false;
+
+            return true;
         }
     });
 </script>
