@@ -33,7 +33,7 @@
                                 <option value="false" {{ $config->cupom_desconto == 0 ? 'selected' : '' }}>Não</option>
                             </select>
                         </div>
-                        <div class="d-flex col-12 flex-column justify-content-center align-items-center mb-1 gap-2">
+                        <div class="d-flex col-12 flex-column justify-content-center align-items-center mb-1 gap-2" id="maxDaySaleContainer">
                             <label class="text-start">Valor Max Diário de Vendas</label>
                             <div class="d-flex gap-1">
                                 <input class="col-1 " type="checkbox" id="maxDaySaleCheckbox" {{ $config->valor_max_diario_venda_ativo ? 'checked' : '' }}>
@@ -41,7 +41,7 @@
                                     value="{{ $config->valor_max_diario_venda ?? '' }}" disabled>
                             </div>
                         </div>
-                        <div class="d-flex col-12 flex-column justify-content-center align-items-center mb-1 gap-2">
+                        <div class="d-flex col-12 flex-column justify-content-center align-items-center mb-1 gap-2" id="maxVisitorBuyContainer">
                             <label class="text-start">Valor Max Diário por Visitante de Compras</label>
                             <div class="d-flex gap-1">
                                 <input class="col-1 " type="checkbox" id="maxVisitorBuyCheckbox" {{ $config->valor_max_diario_compra_visitante_ativo ? 'checked' : '' }}>
@@ -81,26 +81,73 @@
 
 @include('masks.footer')
 
+<style>
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 4px;
+        text-align: center;
+    }
+</style>
+
+
 <script>
     $(document).ready(function () {
+        // Ativa ou desativa os inputs dependendo dos checkboxes
         $('#maxDaySaleCheckbox').on('change', function () {
             $('#maxDaySale').prop('disabled', !this.checked);
+            if (!this.checked) {
+                $('#maxDaySaleContainer').next('.error-message').remove();
+            }
         });
 
         $('#maxVisitorBuyCheckbox').on('change', function () {
             $('#maxVisitorBuy').prop('disabled', !this.checked);
+            if (!this.checked) {
+                $('#maxVisitorBuyContainer').next('.error-message').remove();
+            }
         });
 
         $('#saveButton').on('click', function () {
-            let maxDaySale = $('#maxDaySale').val();
-            let maxVisitorBuy = $('#maxVisitorBuy').val();
-            let emailValidation = $('#emailValidation').val();
-            let privacyPolicy = $('#privacyPolicy').val();
-            let ingressoImpresso = $('#ingressoImpresso').val();
-            let acceptDiscountCoupon = $('#acceptDiscountCoupon').val();
-            let maxDaySaleActive = $('#maxDaySaleCheckbox').prop('checked');
-            let maxVisitorBuyActive = $('#maxVisitorBuyCheckbox').prop('checked');
+            $('.error-message').remove(); // Remove erros anteriores
 
+            let isValid = true;
+
+            const maxDaySaleActive = $('#maxDaySaleCheckbox').prop('checked');
+            const maxVisitorBuyActive = $('#maxVisitorBuyCheckbox').prop('checked');
+            const maxDaySale = $('#maxDaySale').val().trim();
+            const maxVisitorBuy = $('#maxVisitorBuy').val().trim();
+            const privacyPolicy = $('#privacyPolicy').val().trim();
+
+            const emailValidation = $('#emailValidation').val();
+            const ingressoImpresso = $('#ingressoImpresso').val();
+            const acceptDiscountCoupon = $('#acceptDiscountCoupon').val();
+
+            // 🔥 Validação dos checkboxes com seus inputs
+            if (maxDaySaleActive) {
+                if (!maxDaySale || isNaN(maxDaySale) || Number(maxDaySale) <= 0) {
+                    $('#maxDaySaleContainer').after('<div class="error-message">Informe um valor válido para "Valor Máximo Diário de Vendas".</div>');
+                    isValid = false;
+                }
+            }
+
+            if (maxVisitorBuyActive) {
+                if (!maxVisitorBuy || isNaN(maxVisitorBuy) || Number(maxVisitorBuy) <= 0) {
+                    $('#maxVisitorBuyContainer').after('<div class="error-message">Informe um valor válido para "Valor Máximo Diário por Visitante".</div>');
+                    isValid = false;
+                }
+            }
+
+            // 🚩 Validação da Política de Privacidade
+            if (!privacyPolicy) {
+                $('#privacyPolicy').after('<div class="error-message">O campo Política de Privacidade é obrigatório.</div>');
+                isValid = false;
+            }
+
+            // ⚠️ Se tiver erro, não envia
+            if (!isValid) return;
+
+            // Envia os dados via Ajax
             $.ajax({
                 url: '{{ route('saveConfiguration') }}',
                 type: 'POST',
@@ -132,10 +179,27 @@
             $('#feedbackMessage').text(message);
             $('#feedbackModal').modal('show');
 
-            // Recarregar página ao fechar o modal
             $('#feedbackModal').on('hidden.bs.modal', function () {
                 location.reload();
             });
         }
+
+        // ✅ Remove erros ao digitar
+        $('#maxDaySale, #maxVisitorBuy, #privacyPolicy').on('input', function () {
+            $(this).next('.error-message').remove();
+        });
+
+        $('#maxDaySaleCheckbox').on('change', function () {
+            if (!this.checked) {
+                $('#maxDaySale').next('.error-message').remove();
+            }
+        });
+
+        $('#maxVisitorBuyCheckbox').on('change', function () {
+            if (!this.checked) {
+                $('#maxVisitorBuy').next('.error-message').remove();
+            }
+        });
     });
 </script>
+
