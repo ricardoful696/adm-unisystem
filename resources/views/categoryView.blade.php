@@ -5,7 +5,7 @@
         <div class="my-5">
             <h2>Categorias</h2>
         </div>
-        <div class="d-flex justify-content-center my-4 col-6 ">
+        <div class="d-flex justify-content-center my-4 col-6 " id="newCategoryContainer">
             <input type="text" id="newCategoryInput" class="form-control" placeholder="Nova Categoria">
             <button class="btn btn-success ms-2" id="addCategoryButton">Adicionar</button>
         </div>
@@ -26,18 +26,28 @@
 
 @include('masks.footer')
 
+<style>
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 4px;
+    }
+</style>
+
 <script>
     $(document).ready(function () {
         $('#addCategoryButton').on('click', function () {
-            const categoryName = $('#newCategoryInput').val();
+            $('.error-message').remove(); // Remove mensagens de erro anteriores
 
-            if (!categoryName.trim()) {
-                bootbox('Digite um nome para a categoria.');
+            const categoryName = $('#newCategoryInput').val().trim();
+
+            if (!categoryName) {
+                $('#newCategoryContainer').after('<div class="error-message">O campo "Nova Categoria" é obrigatório.</div>');
                 return;
             }
 
             $.ajax({
-                url: '/categorySave', 
+                url: '/categorySave',
                 type: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -49,16 +59,18 @@
                     if (response.success) {
                         window.location.reload();
                     } else {
-                        bootbox('Erro ao adicionar categoria. Tente novamente.');
+                        $('#newCategoryInput').after('<div class="error-message">Erro ao adicionar categoria. Tente novamente.</div>');
                     }
                 },
                 error: function () {
-                    bootbox('Erro ao adicionar categoria. Verifique sua conexão ou tente novamente.');
+                    $('#newCategoryInput').after('<div class="error-message">Erro ao adicionar categoria. Verifique sua conexão ou tente novamente.</div>');
                 }
             });
         });
 
         $('.editCategoryButton').on('click', function () {
+            $('.error-message').remove();
+
             const listItem = $(this).closest('li');
             const inputField = listItem.find('.category-name');
             const saveButton = listItem.find('.saveCategoryButton');
@@ -70,17 +82,19 @@
         });
 
         $('.saveCategoryButton').on('click', function () {
+            $('.error-message').remove();
+
             const listItem = $(this).closest('li');
             const categoryId = listItem.find('.category-name').data('id');
             const newCategoryName = listItem.find('.category-name').val().trim();
 
             if (!newCategoryName) {
-                bootbox('Digite um nome para a categoria.');
+                listItem.find('.category-name').after('<div class="error-message">O campo não pode estar vazio.</div>');
                 return;
             }
 
             $.ajax({
-                url: '/categoryEdit', 
+                url: '/categoryEdit',
                 type: 'POST',
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -93,13 +107,23 @@
                     if (response.success) {
                         window.location.reload();
                     } else {
-                        bootbox('Erro ao editar categoria. Tente novamente.');
+                        listItem.find('.category-name').after('<div class="error-message">Erro ao editar categoria. Tente novamente.</div>');
                     }
                 },
                 error: function () {
-                    bootbox('Erro ao editar categoria. Verifique sua conexão ou tente novamente.');
+                    listItem.find('.category-name').after('<div class="error-message">Erro ao editar categoria. Verifique sua conexão ou tente novamente.</div>');
                 }
             });
         });
+
+        // Limpa mensagem de erro quando começa a digitar
+        $('#newCategoryInput').on('input', function () {
+            $(this).next('.error-message').remove();
+        });
+
+        $('.category-name').on('input', function () {
+            $(this).next('.error-message').remove();
+        });
     });
 </script>
+
