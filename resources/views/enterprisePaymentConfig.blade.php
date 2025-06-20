@@ -111,27 +111,51 @@
 
 @include('masks.footer')
 
+<style>
+    .error-message {
+        color: red;
+        font-size: 0.875rem;
+        margin-top: 4px;
+    }
+</style>
+
+
 <script>
     $(document).ready(function () {
-        $('#saveButton').on('click', function () {
-            let paymentEnterprise = $('#paymentEnterprise').val();
-            let acceptPix = $('#acceptPix').val();
-            let acceptCard = $('#acceptCard').val();
-            let acceptBoleto = $('#acceptBoleto').val();
-            let acceptMastercard = $('#acceptMastercard').val();
-            let acceptCielo = $('#acceptCielo').val();
-            let acceptVisa = $('#acceptVisa').val();
-            let acceptAmex = $('#acceptAmex').val();
-            let acceptElo = $('#acceptElo').val();
-            let maxCardInstallments = $('#maxCardInstallments').val();
-            let pixKey = $('#pixKey').val();
 
+        $('#saveButton').on('click', function () {
+            // Limpa mensagens de erro anteriores
+            $('.error-message').remove();
+
+            let isValid = true;
+
+            const pixKey = $('#pixKey').val().trim();
+            const acceptPix = $('#acceptPix').val();
+            const acceptCard = $('#acceptCard').val();
+            const acceptBoleto = $('#acceptBoleto').val();
+            const acceptMastercard = $('#acceptMastercard').val();
+            const acceptCielo = $('#acceptCielo').val();
+            const acceptVisa = $('#acceptVisa').val();
+            const acceptAmex = $('#acceptAmex').val();
+            const acceptElo = $('#acceptElo').val();
+            const maxCardInstallments = $('#maxCardInstallments').val();
+
+            // 🔥 Validação da chave Pix
+            if (!pixKey) {
+                $('#pixKey').after('<div class="error-message">O campo Chave Pix é obrigatório.</div>');
+                isValid = false;
+            }
+
+            // ⚠️ Se houver erro, não executa o Ajax
+            if (!isValid) return;
+
+            // Envia os dados se tudo estiver válido
             $.ajax({
                 url: '{{ route('savePaymentConfiguration') }}',
                 type: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    paymentEnterprise: paymentEnterprise,
+                    pixKey: pixKey,
                     acceptPix: acceptPix,
                     acceptCard: acceptCard,
                     acceptBoleto: acceptBoleto,
@@ -140,13 +164,12 @@
                     acceptVisa: acceptVisa,
                     acceptAmex: acceptAmex,
                     acceptElo: acceptElo,
-                    maxCardInstallments: maxCardInstallments,
-                    pixKey: pixKey
+                    maxCardInstallments: maxCardInstallments
                 },
                 success: function (response) {
-                    let message = response.success ?
-                        'Configurações salvas com sucesso!' :
-                        'Erro ao salvar as configurações!';
+                    const message = response.success
+                        ? 'Configurações salvas com sucesso!'
+                        : 'Erro ao salvar as configurações!';
                     showModal(message);
                 },
                 error: function (xhr, status, error) {
@@ -160,10 +183,14 @@
             $('#feedbackMessage').text(message);
             $('#feedbackModal').modal('show');
 
-            // Recarregar página ao fechar o modal
             $('#feedbackModal').on('hidden.bs.modal', function () {
                 location.reload();
             });
         }
+
+        // ✅ Remove erro ao começar a digitar no campo Pix
+        $('#pixKey').on('input', function () {
+            $(this).next('.error-message').remove();
+        });
     });
 </script>
