@@ -85,11 +85,56 @@
 @include('masks.footer')
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
 <script>
     $(document).ready(function () {
+        // Máscara para telefone
+        $('#telefone').mask('(00) 00000-0000').blur(function () {
+            const tel = $(this).val().replace(/\D/g, '');
+            if (tel.length === 10) {
+                $(this).mask('(00) 0000-0000');
+            } else {
+                $(this).mask('(00) 00000-0000');
+            }
+        });
+
+        function isValidEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
+
         $('#saveUserButton').click(function () {
-            let formData = {
+            $('.error-message').remove(); // Remove erros anteriores
+            let isValid = true;
+
+            const fields = [
+                { id: 'nome', label: 'Nome', required: true },
+                { id: 'sobrenome', label: 'Sobrenome', required: true },
+                { id: 'documento', label: 'Documento', required: true },
+                { id: 'sexo', label: 'Sexo', required: true },
+                { id: 'telefone', label: 'Telefone', required: true },
+                { id: 'email', label: 'Email', required: true },
+                { id: 'data_nascimento', label: 'Data de Nascimento', required: true },
+            ];
+
+            fields.forEach(field => {
+                const value = $(`#${field.id}`).val().trim();
+                if (field.required && !value) {
+                    isValid = false;
+                    $(`#${field.id}`).after(`<div class="error-message">O campo ${field.label} é obrigatório.</div>`);
+                }
+            });
+
+            const email = $('#email').val().trim();
+            if (email && !isValidEmail(email)) {
+                isValid = false;
+                $('#email').after(`<div class="error-message">Digite um e-mail válido.</div>`);
+            }
+
+            if (!isValid) return; // Interrompe o envio se houver erros
+
+            const formData = {
                 nome: $('#nome').val(),
                 sobrenome: $('#sobrenome').val(),
                 documento: $('#documento').val(),
@@ -111,7 +156,7 @@
                     $('#feedbackModal').modal('show');
                 },
                 error: function (xhr) {
-                    let errorMessage = xhr.responseJSON?.message || "Erro ao atualizar usuário.";
+                    const errorMessage = xhr.responseJSON?.message || "Erro ao atualizar usuário.";
                     $('#feedbackMessage').text(errorMessage);
                     $('#feedbackModal').modal('show');
                 }
