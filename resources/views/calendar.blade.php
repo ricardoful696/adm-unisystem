@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="d-flex justify-content-center px-5 gap-5">
-            <div id="dia_semana" class="col-12 col-md-3 preco-por-dia mt-2 align-self-start" style="display:none;">
+            <div id="dia_semana" class="col-12 col-md-3 preco-por-dia mt-2 align-self-start">
                 <div class="d-flex">
                     <div class="me-3">
                         <label class="fw-bold">Ativo</label>
@@ -45,14 +45,14 @@
                         <label class="fw-bold">Dias</label>
                     </div>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2" id="dias-semana">
                     <div class="d-flex flex-column">
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
                                 <input type="checkbox" class="checkbox-dia" name="ativo[]" value="segunda" checked>
                             </div>
                             <div class="d-flex flex-column">
-                                <label>Segunda</label>
+                                <label>Segunda-Feira</label>
                                 <input type="number" class="class-input" id="preco-segunda">
                             </div>
                         </div>
@@ -61,7 +61,7 @@
                                 <input type="checkbox" class="checkbox-dia" name="ativo[]" value="terca" checked>
                             </div>
                             <div class="d-flex flex-column">
-                                <label> Terça</label>
+                                <label> Terça-Feira</label>
                                 <input type="number" class="class-input" id="preco-terca">
                             </div>
                         </div>
@@ -70,7 +70,7 @@
                                 <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quarta" checked>
                             </div>
                             <div class="d-flex flex-column">
-                                <label> Quarta</label>
+                                <label> Quarta-Feira</label>
                                 <input type="number" class="class-input" id="preco-quarta">
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                                 <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quinta" checked>
                             </div>
                             <div class="d-flex flex-column">
-                                <label> Quinta</label>
+                                <label> Quinta-Feira</label>
                                 <input type="number" class="class-input" id="preco-quinta">
                             </div>
                         </div>
@@ -88,7 +88,7 @@
                                 <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sexta" checked>
                             </div>
                             <div class="d-flex flex-column">
-                                <label> Sexta</label>
+                                <label> Sexta-Feira</label>
                                 <input type="number" class="class-input" id="preco-sexta">
                             </div>
                         </div>
@@ -267,6 +267,20 @@
 @include('masks.footer')
 
 <script>
+    function esconderInputsNumber() {
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.style.display = 'none';
+        });
+    }
+
+    function mostrarInputsNumber() {
+        const inputs = document.querySelectorAll('input[type="number"]');
+        inputs.forEach(input => {
+            input.style.display = 'block';
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const tipoPrecoSelect = document.getElementById('tipo_preco');
         const divDiaSemana = document.getElementById('dia_semana');
@@ -296,6 +310,7 @@
         const empresa = "{{ $empresa }}";
         const categoriaSelect = document.getElementById('categoria');
         const produtoSelect = document.getElementById('produto');
+        const divDiaSemana = document.getElementById('dia_semana');
         const tipoPrecoSelect = document.getElementById('tipo_preco');
         var calendarEl = document.getElementById('calendar');
         var calendar;
@@ -310,7 +325,9 @@
                 document.querySelector('#div-produto select').style.display = 'none';
                 document.querySelector('#div-tipo_preco label').style.display = 'none';
                 document.querySelector('#div-tipo_preco select').style.display = 'none';
+                divDiaSemana.style.display = 'block';
                 allCalendarEdit();
+                esconderInputsNumber()
             } else if (categoriaId) {
                 document.querySelector('#div-produto label').style.display = 'block';
                 document.querySelector('#div-produto select').style.display = 'block';
@@ -530,7 +547,7 @@
                             console.log(data);
                             successCallback(data.events);
                             $('#geral').hide();
-                            $('#dia_semana').hide();
+                            // $('#dia_semana').hide();
                             $('#valor').hide();
 
                         },
@@ -601,15 +618,39 @@
 
         let produtoId = $('#produto').val();
         let tipoPreco = $('#tipo_preco').val();
+        let geral = $('#categoria').val();
         let valor_unico = null;
         let precoPorDia = null;
 
         console.log(produtoId);
         console.log(tipoPreco);
 
-        if (!produtoId) {
-            showModal('Por favor, selecione um produto.', 'error');
-            return;
+        let diasAtivos = {};
+        let tipoGeral = false;
+        const mapaDias = {
+            segunda: 'segunda-feira',
+            terca: 'terça-feira',
+            quarta: 'quarta-feira',
+            quinta: 'quinta-feira',
+            sexta: 'sexta-feira',
+            sabado: 'sábado',
+            domingo: 'domingo',
+            feriado: 'feriado'
+        };
+
+        if (geral !== 'categoriaGeral') {
+            if (!produtoId) {
+                showModal('Por favor, selecione um produto.', 'error');
+                return;
+            }
+        } else if (geral === 'categoriaGeral') {
+            $('#dias-semana input.checkbox-dia').each(function () {
+                const dia = $(this).val();  // pega o valor: "segunda", "terca", etc.
+                const diaFormatado = mapaDias[dia]; // converte para "Segunda-Feira", "Terça-Feira", etc.
+                const marcado = $(this).is(':checked'); // true ou false
+                diasAtivos[diaFormatado] = marcado;
+            });
+            tipoGeral = true;
         }
 
         if (tipoPreco == 'dia_semana') {
@@ -635,6 +676,8 @@
             tipo_preco: tipoPreco,
             valor_unico: valor_unico,
             preco_por_dia: precoPorDia,
+            dias_ativos: diasAtivos,
+            tipo_geral: tipoGeral,
             _token: $('input[name="_token"]').val()
         };
 

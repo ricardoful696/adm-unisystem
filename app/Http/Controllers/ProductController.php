@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Calendario;
 use App\Models\CategoriaProduto;
 use App\Models\ProdutoPreco;
 use App\Models\TipoProduto;
@@ -400,6 +401,8 @@ class ProductController extends Controller
         $precoPorDia = $request->input('preco_por_dia', []);
         $tipo_preco = $request->input('tipo_preco');
         $valor_unico = $request->input('valor_unico');
+        $dias_ativos = $request->input('dias_ativos');
+        $tipo_geral = $request->input('tipo_geral');
 
         $empresaId = Auth::user()->empresa_id;
         
@@ -407,6 +410,16 @@ class ProductController extends Controller
 
             DB::beginTransaction();
 
+            if ($tipo_geral) {
+                foreach ($dias_ativos as $dia => $status) {
+                    Calendario::where('empresa_id', $empresaId)
+                        ->where('dia_semana', $dia)
+                        ->update([
+                            'status' => filter_var($status, FILTER_VALIDATE_BOOLEAN)
+                        ]);
+                }
+            }
+                 
             if($tipo_preco == 'dia_semana'){
                 $preco = ProdutoPreco::where('produto_id', $productId)->first();
                 
