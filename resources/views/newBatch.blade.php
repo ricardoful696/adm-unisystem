@@ -305,6 +305,13 @@
         const dadosLotes = capturarDadosLotes();
         const categoriasProdutos = [];
 
+        if (!nome || !qtdLotes || !tipoLote || !tipoDesconto) {
+            document.getElementById('feedbackMessage').textContent = 'Preencha todos os campos obrigatórios: Nome, Quantidade de Lotes, Tipo de Lote e Tipo de Desconto.';
+            const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+            modal.show();
+            return; 
+        }
+
         if (tipoDesconto == 1) {
             dadosLotes.forEach(lote => {
                 if (lote.valorDesconto) {
