@@ -302,13 +302,19 @@
         const qtdLotes = document.getElementById('qtd_lotes').value;
         const tipoLote = document.getElementById('tipo_lote').value;
         const tipoDesconto = document.getElementById('tipo_desconto').value;
-        const dadosLotes = capturarDadosLotes();
+        // const dadosLotes = capturarDadosLotes();
         const categoriasProdutos = [];
 
         if (!nome || !qtdLotes || !tipoLote || !tipoDesconto) {
             document.getElementById('feedbackMessage').textContent = 'Preencha todos os campos obrigatórios: Nome, Quantidade de Lotes, Tipo de Lote e Tipo de Desconto.';
             const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
             modal.show();
+            return; 
+        }
+        
+        const { lotes: dadosLotes, erro } = capturarDadosLotes(tipoLote);
+        if (erro) {
+            mostrarFeedback(erro)
             return; 
         }
 
@@ -321,6 +327,21 @@
                 }
             });
         }
+
+
+        // const camposDescontoInvalidos = dadosLotes.some(lote =>
+        //     lote.valorDesconto === undefined ||
+        //     lote.valorDesconto === null ||
+        //     lote.valorDesconto === '' ||
+        //     isNaN(Number(lote.valorDesconto))
+        // );
+
+        // if (camposDescontoInvalidos) {
+        //     document.getElementById('feedbackMessage').textContent = 'Preencha o valor de desconto para todos os lotes.';
+        //     const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+        //     modal.show();
+        //     return;
+        // }
 
         document.querySelectorAll('.dynamic-row').forEach(row => {
             const categoria = row.querySelector('.categoria-select').value;
@@ -377,8 +398,9 @@
             });
     });
 
-    function capturarDadosLotes() {
+    function capturarDadosLotes(tipoLote) {
         const lotes = [];
+        let erro = null;
 
         document.querySelectorAll('.lote').forEach((loteDiv, index) => {
             const loteData = {lote: index + 1};
@@ -388,27 +410,46 @@
             const qtdVendas = loteDiv.querySelector(`#qtdVendas${index + 1}`);
             const valorDesconto = loteDiv.querySelector(`#valorDesconto${index + 1}`);
 
-            if (dataInicio && dataFinal) {
+            if (tipoLote === 'data') {
+                if (!dataInicio?.value || !dataFinal?.value) {
+                    erro = `Preencha as datas de início e fim do Lote ${index + 1}`;
+                    return;
+                }
                 loteData.dataInicio = dataInicio.value;
                 loteData.dataFinal = dataFinal.value;
             }
 
-            if (qtdVendas) {
+            if (tipoLote === 'quantidade') {
+                if (!qtdVendas?.value || parseInt(qtdVendas.value) <= 0) {
+                    erro = `Preencha a quantidade de vendas do Lote ${index + 1}`;
+                    return;
+                }
                 loteData.qtdVendas = qtdVendas.value;
             }
 
-            if (valorDesconto) {
-                let valorStr = valorDesconto.value;
-                valorStr = valorStr.replace(/[^\d,.-]/g, '').replace(',', '.');
-                let valor = parseFloat(valorStr);
-                loteData.valorDesconto = isNaN(valor) ? 0 : valor.toFixed(2);
+            if (!valorDesconto?.value) {
+                erro = `Preencha o valor de desconto do Lote ${index + 1}`;
+                return;
             }
+
+            let valorStr = valorDesconto.value.replace(/[^\d,.-]/g, '').replace(',', '.');
+            let valor = parseFloat(valorStr);
+            loteData.valorDesconto = isNaN(valor) ? 0 : valor.toFixed(2);
 
             lotes.push(loteData);
         });
 
-        console.log('Lotes capturados:', lotes);
-        return lotes;
+        return { lotes, erro };
+    }
+
+    function mostrarFeedback(mensagem, sucesso = false) {
+        const feedback = document.getElementById('feedbackMessage');
+        feedback.textContent = mensagem;
+        const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+        modal.show();
+        modal._element.addEventListener('hidden.bs.modal', function () {
+            if (sucesso) location.reload();
+        });
     }
 
 </script>
