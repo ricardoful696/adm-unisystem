@@ -327,14 +327,23 @@
             });
         }
 
+        let camposProdutoInvalidos = false;
+
         document.querySelectorAll('.dynamic-row').forEach(row => {
             const categoria = row.querySelector('.categoria-select').value;
             const produto = row.querySelector('.produto-select').value;
 
-            if (categoria && produto) {
-                categoriasProdutos.push({categoria_id: categoria, produto_id: produto});
+            if (!categoria || !produto) {
+                camposProdutoInvalidos = true;
+            } else {
+                categoriasProdutos.push({ categoria_id: categoria, produto_id: produto });
             }
         });
+
+        if (camposProdutoInvalidos) {
+            mostrarFeedback('Preencha corretamente a categoria e o produto para todos os itens adicionados.');
+            return;
+        }
 
         const formData = {
             nome,
