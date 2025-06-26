@@ -302,7 +302,6 @@
         const qtdLotes = document.getElementById('qtd_lotes').value;
         const tipoLote = document.getElementById('tipo_lote').value;
         const tipoDesconto = document.getElementById('tipo_desconto').value;
-        // const dadosLotes = capturarDadosLotes();
         const categoriasProdutos = [];
 
         if (!nome || !qtdLotes || !tipoLote || !tipoDesconto) {
@@ -327,21 +326,6 @@
                 }
             });
         }
-
-
-        // const camposDescontoInvalidos = dadosLotes.some(lote =>
-        //     lote.valorDesconto === undefined ||
-        //     lote.valorDesconto === null ||
-        //     lote.valorDesconto === '' ||
-        //     isNaN(Number(lote.valorDesconto))
-        // );
-
-        // if (camposDescontoInvalidos) {
-        //     document.getElementById('feedbackMessage').textContent = 'Preencha o valor de desconto para todos os lotes.';
-        //     const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
-        //     modal.show();
-        //     return;
-        // }
 
         document.querySelectorAll('.dynamic-row').forEach(row => {
             const categoria = row.querySelector('.categoria-select').value;
