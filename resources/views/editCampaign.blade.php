@@ -151,6 +151,37 @@
             var minimoCompras = $('#minimoCompras').val();
             var maximoCompras = $('#maximoCompras').val();
 
+            const campanhaId = "{{ $campanha->campanha_id}}";
+
+            const campos = [
+                { id: 'descricao', label: 'Nome' },
+                { id: 'dataInicial', label: 'Data Inicial' },
+                { id: 'dataFinal', label: 'Data Final' },
+                { id: 'tipoDesconto', label: 'Tipo de Desconto' },
+                { id: 'desconto', label: 'Desconto' },
+                { id: 'qtdTicketsCoupon', label: 'Qtd de Ingressos por Cupom' },
+                { id: 'maxLimitDay', label: 'Limite Diário de Cupons' },
+                { id: 'minimoCompras', label: 'Limite Mínimo de Compras' },
+                { id: 'maximoCompras', label: 'Limite Máximo de Desconto' }
+            ];
+
+            const camposVazios = campos.filter(c => {
+                const valor = $(`#${c.id}`).val();
+                return !valor || valor.trim() === '';
+            });
+
+            if (camposVazios.length > 0) {
+                const lista = camposVazios.map(c => `• ${c.label}`).join('\n');
+
+                $('#ajaxResponseModalLabel').text('Campos obrigatórios');
+                $('#ajaxResponseMessage').html(`
+                    Os seguintes campos precisam ser preenchidos:<br><br>
+                    <pre style="white-space: pre-wrap;">${lista}</pre>
+                `);
+                $('#ajaxResponseModal').modal('show');
+                return;
+            }
+
             $.ajax({
                 url: '/campaignUpdate',
                 type: 'POST',
