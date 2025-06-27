@@ -183,6 +183,32 @@
             var minimoCompras = $('#minimoCompras').val();
             var maximoCompras = $('#maximoCompras').val();
 
+            // Campos obrigatórios
+            const requiredFields = [
+                { id: 'descricao', value: descricao },
+                { id: 'dataInicial', value: dataInicial },
+                { id: 'dataFinal', value: dataFinal },
+                { id: 'tipoDesconto', value: tipoDesconto },
+                { id: 'desconto', value: desconto },
+                { id: 'qtdCoupons', value: qtdCoupons },
+                { id: 'qtdTicketsCoupon', value: qtdTicketsCoupon },
+                { id: 'maxLimitDay', value: maxLimitDay },
+                { id: 'numberLenghtCoupon', value: numberLenghtCoupon },
+                { id: 'sigla', value: sigla },
+                { id: 'minimoCompras', value: minimoCompras },
+                { id: 'maximoCompras', value: maximoCompras }
+            ];
+
+            const emptyFields = requiredFields.filter(f => !f.value || f.value.trim() === '');
+
+            if (emptyFields.length > 0) {
+                let fieldNames = emptyFields.map(f => `• ${$(`#${f.id}`).prev('label').text()}`).join('\n');
+                $('#ajaxResponseModalLabel').text('Campos obrigatórios');
+                $('#ajaxResponseMessage').text('Preencha todos os campos obrigatórios:\n\n' + fieldNames);
+                $('#ajaxResponseModal').modal('show');
+                return;
+            }
+
             $.ajax({
                 url: '/saveCampaign',
                 type: 'POST',
