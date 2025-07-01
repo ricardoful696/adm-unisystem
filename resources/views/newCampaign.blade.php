@@ -135,6 +135,10 @@
 
 
 <script>
+    function showError(inputSelector, message) {
+        $(inputSelector).after('<span class="error-message" style="color: red; font-size: 0.9em;">' + message + '</span>');
+    }
+
     document.addEventListener('DOMContentLoaded', (event) => {
         const today = new Date();
         const formattedDate = today.toISOString().split('T')[0];
@@ -165,6 +169,8 @@
 
 
         $('#saveCampaign').click(function () {
+            $('.error-message').remove();
+
             var descricao = $('#descricao').val();
             var dataInicial = $('#dataInicial').val();
             var dataFinal = $('#dataFinal').val();
@@ -199,15 +205,16 @@
                 { id: 'maximoCompras', value: maximoCompras }
             ];
 
-            const emptyFields = requiredFields.filter(f => !f.value || f.value.trim() === '');
+            let hasErrors = false;
 
-            if (emptyFields.length > 0) {
-                let fieldNames = emptyFields.map(f => `• ${$(`#${f.id}`).prev('label').text()}`).join('\n');
-                $('#ajaxResponseModalLabel').text('Campos obrigatórios');
-                $('#ajaxResponseMessage').text('Preencha todos os campos obrigatórios:\n\n' + fieldNames);
-                $('#ajaxResponseModal').modal('show');
-                return;
-            }
+            requiredFields.forEach(f => {
+                if (!f.value || f.value.trim() === '') {
+                    showError(`#${f.id}`, 'Este campo é obrigatório');
+                    hasErrors = true;
+                }
+            });
+
+            if (hasErrors) return;
 
             $.ajax({
                 url: '/saveCampaign',
