@@ -297,6 +297,10 @@
         }
     });
 
+    function showError(inputSelector, message) {
+        $(inputSelector).after('<span class="error-message" style="color: red; font-size: 0.9em;">' + message + '</span>');
+    }
+
     document.getElementById('saveProductButton').addEventListener('click', function () {
         const nome = document.getElementById('nome').value;
         const qtdLotes = document.getElementById('qtd_lotes').value;
@@ -304,17 +308,31 @@
         const tipoDesconto = document.getElementById('tipo_desconto').value;
         const categoriasProdutos = [];
 
-        if (!nome || !qtdLotes || !tipoLote || !tipoDesconto) {
-            document.getElementById('feedbackMessage').textContent = 'Preencha todos os campos obrigatórios: Nome, Quantidade de Lotes, Tipo de Lote e Tipo de Desconto.';
-            const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
-            modal.show();
-            return; 
+        let hasError = false;
+
+        if (!nome) {
+            showError('#nome', 'O campo Nome é obrigatório');
+            hasError = true;
         }
-        
+        if (!qtdLotes) {
+            showError('#qtd_lotes', 'Selecione a quantidade de lotes');
+            hasError = true;
+        }
+        if (!tipoLote) {
+            showError('#tipo_lote', 'Selecione o tipo de lote');
+            hasError = true;
+        }
+        if (!tipoDesconto) {
+            showError('#tipo_desconto', 'Selecione o tipo de desconto');
+            hasError = true;
+        }
+
+        if (hasError) return;
+
         const { lotes: dadosLotes, erro } = capturarDadosLotes(tipoLote);
         if (erro) {
-            mostrarFeedback(erro)
-            return; 
+            // showError('#lotesContainer', erro);
+            return;
         }
 
         if (tipoDesconto == 1) {
@@ -335,13 +353,13 @@
 
             if (!categoria || !produto) {
                 camposProdutoInvalidos = true;
+                showError(row, 'Preencha a categoria e o produto corretamente');
             } else {
                 categoriasProdutos.push({ categoria_id: categoria, produto_id: produto });
             }
         });
 
         if (camposProdutoInvalidos) {
-            mostrarFeedback('Preencha corretamente a categoria e o produto para todos os itens adicionados.');
             return;
         }
 
@@ -393,10 +411,13 @@
 
     function capturarDadosLotes(tipoLote) {
         const lotes = [];
-        let erro = null;
+        let hasErro = false;
 
         document.querySelectorAll('.lote').forEach((loteDiv, index) => {
-            const loteData = {lote: index + 1};
+            // Remove erros anteriores do lote
+            loteDiv.querySelectorAll('.error-message').forEach(el => el.remove());
+
+            const loteData = { lote: index + 1 };
 
             const dataInicio = loteDiv.querySelector(`#dataInicio${index + 1}`);
             const dataFinal = loteDiv.querySelector(`#dataFinal${index + 1}`);
@@ -404,35 +425,43 @@
             const valorDesconto = loteDiv.querySelector(`#valorDesconto${index + 1}`);
 
             if (tipoLote === 'data') {
-                if (!dataInicio?.value || !dataFinal?.value) {
-                    erro = `Preencha as datas de início e fim do Lote ${index + 1}`;
-                    return;
+                if (!dataInicio?.value) {
+                    showError(dataInicio, `Informe a data de início do Lote ${index + 1}`);
+                    hasErro = true;
+                } else {
+                    loteData.dataInicio = dataInicio.value;
                 }
-                loteData.dataInicio = dataInicio.value;
-                loteData.dataFinal = dataFinal.value;
+
+                if (!dataFinal?.value) {
+                    showError(dataFinal, `Informe a data final do Lote ${index + 1}`);
+                    hasErro = true;
+                } else {
+                    loteData.dataFinal = dataFinal.value;
+                }
             }
 
             if (tipoLote === 'quantidade') {
                 if (!qtdVendas?.value || parseInt(qtdVendas.value) <= 0) {
-                    erro = `Preencha a quantidade de vendas do Lote ${index + 1}`;
-                    return;
+                    showError(qtdVendas, `Informe uma quantidade válida para o Lote ${index + 1}`);
+                    hasErro = true;
+                } else {
+                    loteData.qtdVendas = qtdVendas.value;
                 }
-                loteData.qtdVendas = qtdVendas.value;
             }
 
             if (!valorDesconto?.value) {
-                erro = `Preencha o valor de desconto do Lote ${index + 1}`;
-                return;
+                showError(valorDesconto, `Informe o valor de desconto do Lote ${index + 1}`);
+                hasErro = true;
+            } else {
+                let valorStr = valorDesconto.value.replace(/[^\d,.-]/g, '').replace(',', '.');
+                let valor = parseFloat(valorStr);
+                loteData.valorDesconto = isNaN(valor) ? 0 : valor.toFixed(2);
             }
-
-            let valorStr = valorDesconto.value.replace(/[^\d,.-]/g, '').replace(',', '.');
-            let valor = parseFloat(valorStr);
-            loteData.valorDesconto = isNaN(valor) ? 0 : valor.toFixed(2);
 
             lotes.push(loteData);
         });
 
-        return { lotes, erro };
+        return { lotes, erro: hasErro };
     }
 
     function mostrarFeedback(mensagem, sucesso = false) {
