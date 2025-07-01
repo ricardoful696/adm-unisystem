@@ -109,6 +109,10 @@
 
 
 <script>
+    function showError(inputSelector, message) {
+        $(inputSelector).after('<span class="error-message" style="color: red; font-size: 0.9em;">' + message + '</span>');
+    }
+
     document.addEventListener('DOMContentLoaded', (event) => {
         const today = new Date();
         const formattedDate = today.toISOString().split('T')[0];
@@ -140,6 +144,8 @@
         }
 
         $('#saveCampaign').click(function () {
+            $('.error-message').remove(); 
+
             var ativo = $('#ativo').is(':checked');
             var descricao = $('#descricao').val();
             var dataInicial = $('#dataInicial').val();
@@ -154,33 +160,27 @@
             const campanhaId = "{{ $campanha->campanha_id}}";
 
             const campos = [
-                { id: 'descricao', label: 'Nome' },
-                { id: 'dataInicial', label: 'Data Inicial' },
-                { id: 'dataFinal', label: 'Data Final' },
-                { id: 'tipoDesconto', label: 'Tipo de Desconto' },
-                { id: 'desconto', label: 'Desconto' },
-                { id: 'qtdTicketsCoupon', label: 'Qtd de Ingressos por Cupom' },
-                { id: 'maxLimitDay', label: 'Limite Diário de Cupons' },
-                { id: 'minimoCompras', label: 'Limite Mínimo de Compras' },
-                { id: 'maximoCompras', label: 'Limite Máximo de Desconto' }
+                { id: 'descricao', value: descricao, label: 'Nome' },
+                { id: 'dataInicial', value: dataInicial, label: 'Data Inicial' },
+                { id: 'dataFinal', value: dataFinal, label: 'Data Final' },
+                { id: 'tipoDesconto', value: tipoDesconto, label: 'Tipo de Desconto' },
+                { id: 'desconto', value: desconto, label: 'Desconto' },
+                { id: 'qtdTicketsCoupon', value: qtdTicketsCoupon, label: 'Qtd de Ingressos por Cupom' },
+                { id: 'maxLimitDay', value: maxLimitDay, label: 'Limite Diário de Cupons' },
+                { id: 'minimoCompras', value: minimoCompras, label: 'Limite Mínimo de Compras' },
+                { id: 'maximoCompras', value: maximoCompras, label: 'Limite Máximo de Desconto' }
             ];
 
-            const camposVazios = campos.filter(c => {
-                const valor = $(`#${c.id}`).val();
-                return !valor || valor.trim() === '';
+            let hasError = false;
+
+            campos.forEach(f => {
+                if (!f.value || f.value.trim() === '') {
+                    showError(`#${f.id}`, 'Este campo é obrigatório');
+                    hasError = true;
+                }
             });
 
-            if (camposVazios.length > 0) {
-                const lista = camposVazios.map(c => `• ${c.label}`).join('\n');
-
-                $('#ajaxResponseModalLabel').text('Campos obrigatórios');
-                $('#ajaxResponseMessage').html(`
-                    Os seguintes campos precisam ser preenchidos:<br><br>
-                    <pre style="white-space: pre-wrap;">${lista}</pre>
-                `);
-                $('#ajaxResponseModal').modal('show');
-                return;
-            }
+            if (hasError) return;
 
             $.ajax({
                 url: '/campaignUpdate',
