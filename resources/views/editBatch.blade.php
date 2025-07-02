@@ -96,7 +96,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-   const url = window.location.href;
+    const url = window.location.href;
     const loteIdMatch = url.match(/\/editBatch\/(\d+)/);
     const loteId = loteIdMatch ? loteIdMatch[1] : null;
 
@@ -444,14 +444,39 @@
         }
     });
 
+    function showError(inputSelector, message) {
+        $(inputSelector).after('<span class="error-message" style="color: red; font-size: 0.9em;">' + message + '</span>');
+    }
+
     document.getElementById('saveProductButton').addEventListener('click', function () {
         const ativo = document.getElementById('ativo').checked;
         const nome = document.getElementById('nome').value;
         const qtdLotes = document.getElementById('qtd_lotes').value;
         const tipoLote = document.getElementById('tipo_lote').value;
         const tipoDesconto = document.getElementById('tipo_desconto').value;
-        const dadosLotes = capturarDadosLotes();
+        const { dadosLotes, erro } = capturarDadosLotes();
         const categoriasProdutos = [];
+
+        let hasError = false;
+
+        if (!nome) {
+            showError('#nome', 'O campo Nome é obrigatório');
+            hasError = true;
+        }
+        if (!qtdLotes) {
+            showError('#qtd_lotes', 'Selecione a quantidade de lotes');
+            hasError = true;
+        }
+        if (!tipoLote) {
+            showError('#tipo_lote', 'Selecione o tipo de lote');
+            hasError = true;
+        }
+        if (!tipoDesconto) {
+            showError('#tipo_desconto', 'Selecione o tipo de desconto');
+            hasError = true;
+        }
+
+        if (hasError || erro) return;
 
         if (tipoDesconto == 1) {
             dadosLotes.forEach(lote => {
@@ -522,6 +547,7 @@
 
     function capturarDadosLotes() {
         const lotes = [];
+        let hasErro = false;
 
         document.querySelectorAll('.lote').forEach((loteDiv, index) => {
             const loteData = {
@@ -534,6 +560,20 @@
             const qtdVendas = loteDiv.querySelector(`#qtdVendas${index + 1}`);
             const valorDesconto = loteDiv.querySelector(`#valorDesconto${index + 1}`);
 
+            if (!dataInicio?.value) {
+                showError(dataInicio, `Informe a data de início do Lote ${index + 1}`);
+                hasErro = true;
+            } else {
+                loteData.dataInicio = dataInicio.value;
+            }
+
+            if (!dataFinal?.value) {
+                showError(dataFinal, `Informe a data final do Lote ${index + 1}`);
+                hasErro = true;
+            } else {
+                loteData.dataFinal = dataFinal.value;
+            }
+
             if (dataInicio && dataFinal) {
                 loteData.dataInicio = dataInicio.value;
                 loteData.dataFinal = dataFinal.value;
@@ -541,6 +581,11 @@
             
             if (qtdVendas) {
                 loteData.qtdVendas = qtdVendas.value;
+            }
+
+            if (!valorDesconto?.value) {
+                showError(valorDesconto, `Informe o valor de desconto do Lote ${index + 1}`);
+                hasErro = true;
             }
 
             if (valorDesconto) {
@@ -554,7 +599,7 @@
         });
 
         console.log('Lotes capturados:', lotes);
-        return lotes;
+        return { dadosLotes: lotes, erro: hasErro };
     }
 
 </script>
