@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CalendarioParametro;
 use App\Models\CategoriaProduto;
 use App\Models\Produto;
 use App\Models\ProdutoPrecoDia;
@@ -47,13 +48,24 @@ class AdmController extends Controller
         $empresa = Session::get('empresa');
         $dados = Empresa::where('nome_fantasia', $empresa)->firstOrFail();
         $empresa_id = $dados->empresa_id;
-        $calendario = Calendario::where('empresa_id', $empresa_id)->get();
+
+        $calendario = Calendario::where('empresa_id', $empresa_id)
+            ->get()
+            ->keyBy('dia_semana'); // ← organiza por dia
+
         $categorias = CategoriaProduto::where('empresa_id', $empresa_id)
-        ->with('tipoProduto')
-        ->get();
+            ->with('tipoProduto')
+            ->get();
+
+        $calendario_parametro = CalendarioParametro::where('empresa_id', $empresa_id)
+            ->get();
+
+        $parametrosMapeados = $calendario_parametro->pluck('status', 'dia_semana')->toArray();
+
         $produtos = [];
 
-        return view('calendar', compact('dados', 'empresa', 'calendario', 'categorias', 'produtos'));
+
+        return view('calendar', compact('dados', 'empresa', 'calendario', 'categorias', 'produtos', 'parametrosMapeados'));
     }
 
     public function getProduct($categoriaId)

@@ -20,6 +20,7 @@ use App\Models\PromocaoDataEspecifica;
 use App\Models\PromocaoDescontoFixo;
 use App\Models\PromocaoNivel;
 use App\Models\ComboProduto;
+use App\Models\CalendarioParametro;
 
 class ProductController extends Controller
 {
@@ -417,6 +418,34 @@ class ProductController extends Controller
                         ->update([
                             'status' => filter_var($status, FILTER_VALIDATE_BOOLEAN)
                         ]);
+                }
+
+                try {
+                    $mapaDias = [
+                        'segunda-feira' => 'segunda',
+                        'terça-feira' => 'terca',
+                        'quarta-feira' => 'quarta',
+                        'quinta-feira' => 'quinta',
+                        'sexta-feira'  => 'sexta',
+                        'sábado'       => 'sabado',
+                        'domingo'      => 'domingo',
+                        'feriado'      => 'feriado',
+                    ];
+
+                    foreach ($dias_ativos as $diaLabel => $status) {
+                        $diaBanco = $mapaDias[strtolower($diaLabel)] ?? null;
+
+                        if ($diaBanco) {
+                            CalendarioParametro::where('empresa_id', $empresaId)
+                                ->where('dia_semana', $diaBanco)
+                                ->update(['status' => filter_var($status, FILTER_VALIDATE_BOOLEAN)]);
+                        }
+                    }
+
+                    DB::commit();
+                } catch (\Throwable $e) {
+                    DB::rollBack();
+                    throw $e;
                 }
             }
                  

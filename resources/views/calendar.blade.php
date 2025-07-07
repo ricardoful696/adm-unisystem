@@ -49,7 +49,7 @@
                     <div class="d-flex flex-column">
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="segunda" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="segunda" {{ !empty($parametrosMapeados['segunda']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label>Segunda-Feira</label>
@@ -58,7 +58,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="terca" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="terca" {{ !empty($parametrosMapeados['terca']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Terça-Feira</label>
@@ -67,7 +67,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quarta" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quarta" {{ !empty($parametrosMapeados['quarta']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Quarta-Feira</label>
@@ -76,7 +76,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quinta" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quinta" {{ !empty($parametrosMapeados['quinta']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Quinta-Feira</label>
@@ -85,7 +85,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sexta" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sexta" {{ !empty($parametrosMapeados['sexta']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Sexta-Feira</label>
@@ -94,7 +94,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sabado" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sabado" {{ !empty($parametrosMapeados['sabado']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Sábado</label>
@@ -103,7 +103,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="domingo" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="domingo" {{ !empty($parametrosMapeados['domingo']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Domingo</label>
@@ -112,7 +112,7 @@
                         </div>
                         <div class="d-flex align-items-end gap-3 mt-1">
                             <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="feriado" checked>
+                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="feriado" {{ !empty($parametrosMapeados['feriado']) ? 'checked' : '' }}>
                             </div>
                             <div class="d-flex flex-column">
                                 <label> Feriado</label>
