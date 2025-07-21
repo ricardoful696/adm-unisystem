@@ -125,7 +125,7 @@
 
   <!-- Aba 3: Preços -->
 <div class="tab-pane fade" id="prices" role="tabpanel" aria-labelledby="prices-tab">
-    <div class="d-flex gap-3 flex-column justify-content-center mt-4">
+    <div class="d-flex gap-3 flex-column justify-content-center mt-4" id="prices-content">
         <!-- Preço Único -->
         <div>
             <div class="form-check my-3">
@@ -390,6 +390,23 @@
             </div>
             <div class="modal-body">
                 <p id="feedbackMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="feedbackModalError" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="feedbackModalLabelError">Mensagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="feedbackMessageError"></p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -1177,6 +1194,10 @@ $(document).ready(function () {
                         '#prices-content',
                         'Preencha pelo menos um preço por data específica ou um preço por dia da semana ativo.'
                     );
+                    showModalError(
+                        'Preencha pelo menos um preço por data específica ou um preço por dia da semana ativo.',
+                        'Erro'
+                    )
                     $('#prices-tab').tab('show');
                 }
             }
@@ -1421,6 +1442,14 @@ $(document).ready(function () {
         $('#feedbackModalLabel').text(modalTitle).removeClass('text-success text-danger').addClass(modalClass);
         $('#feedbackMessage').text(message);
         $('#feedbackModal').modal('show');
+    }
+
+    function showModalError(message, type) {
+        const modalTitle = type === 'success' ? 'Sucesso' : 'Erro';
+        const modalClass = type === 'success' ? 'text-success' : 'text-danger';
+        $('#feedbackModalLabelError').text(modalTitle).removeClass('text-success text-danger').addClass(modalClass);
+        $('#feedbackMessageError').text(message);
+        $('#feedbackModalError').modal('show');
     }
 });
 </script>
