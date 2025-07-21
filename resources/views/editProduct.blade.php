@@ -406,7 +406,7 @@ const produtoData = @json($produto);
 console.log(produtoData);
 const categorias = @json($categorias);
 const produtos = @json($produtos);
-const tipoId = produtoData.promocao_relacionada.promocao_tipo_id;
+const tipoId = produtoData.promocao_relacionada ? produtoData.promocao_relacionada.promocao_tipo_id : null;
 
 // Função para habilitar/desabilitar a aba de promoções com base no checkbox "bilhete"
 function togglePromotionsTab() {
