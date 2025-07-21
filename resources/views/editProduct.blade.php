@@ -426,6 +426,27 @@ function togglePromotionsTab() {
     }
 }
 
+// Função para habilitar/desabilitar a aba de preços com base no checkbox "Produto Fixo"
+function togglePricesTab() {
+    const produtoFixoChecked = $('#produto_fixo').is(':checked');
+    const pricesTabLi = $('#prices-tab-li');
+    const pricesTab = $('#prices-tab');
+
+    if (produtoFixoChecked) {
+        pricesTabLi.removeClass('disabled');
+        pricesTab.removeClass('disabled');
+    } else {
+        pricesTabLi.addClass('disabled');
+        pricesTab.addClass('disabled');
+
+        pricesTab.removeClass('active');
+        $('#prices').removeClass('show active');
+
+        // Volta para a aba info
+        $('#info-tab').addClass('active');
+        $('#info').addClass('show active');
+    }
+}
 
 // Função para renderizar os campos dinâmicos com base no tipo de promoção
 function renderPromocaoFields(tipoId) {
@@ -1054,10 +1075,111 @@ $(document).ready(function () {
             $('#info-tab').tab('show');
         }
 
+        if ($('#capa')[0].files.length === 0) {
+            formValid = false;
+            showError('#capa', 'O upload da capa é obrigatório.');
+            $('#info-tab').tab('show');
+        }
+
         if ($('#categoria_produto_id').val().trim() === '') {
             formValid = false;
             showError('#categoria_produto_id', 'Por favor, selecione uma categoria.');
             $('#info-tab').tab('show');
+        }
+
+        if ($('#qtd_entrada_saida').val().trim() === '') {
+            formValid = false;
+            showError('#qtd_entrada_saida', 'O campo quantidade de entrada e saída é obrigatório.');
+            $('#info-tab').tab('show');
+        }
+
+        // Validação dos produtos adicionados
+        const linhasProdutos = $('#dynamicFields .dynamic-row');
+
+        if (linhasProdutos.length > 0) {
+            let produtosValidos = true;
+
+            linhasProdutos.each(function () {
+                const categoriaSelect = $(this).find('select[name="categoria_produto_id[]"]');
+                const produtoSelect = $(this).find('select[name="produto_id[]"]');
+
+                const categoriaSelecionada = categoriaSelect.val();
+                const produtoSelecionado = produtoSelect.val();
+
+                // Valida Categoria
+                if (!categoriaSelecionada || categoriaSelecionada === '') {
+                    produtosValidos = false;
+
+                    categoriaSelect.addClass('is-invalid');
+
+                    if (categoriaSelect.next('.invalid-feedback').length === 0) {
+                        categoriaSelect.after('<div class="invalid-feedback">Selecione uma categoria ou remova a linha.</div>');
+                    }
+                } else {
+                    categoriaSelect.removeClass('is-invalid');
+                    categoriaSelect.next('.invalid-feedback').remove();
+                }
+
+                // Valida Produto
+                if (!produtoSelecionado || produtoSelecionado === '') {
+                    produtosValidos = false;
+
+                    produtoSelect.addClass('is-invalid');
+
+                    if (produtoSelect.next('.invalid-feedback').length === 0) {
+                        produtoSelect.after('<div class="invalid-feedback">Selecione um produto ou remova a linha.</div>');
+                    }
+                } else {
+                    produtoSelect.removeClass('is-invalid');
+                    produtoSelect.next('.invalid-feedback').remove();
+                }
+            });
+
+            if (!produtosValidos) {
+                formValid = false;
+                $('#products-tab').tab('show');
+            }
+        }
+
+        if ($('#produto_fixo').is(':checked')) {
+            if ($('#preco_unico').is(':checked') && $('#valor_unico').val().trim() === '') {
+                formValid = false;
+                showError('#valor_unico', 'O campo valor único é obrigatório.');
+                $('#prices-tab').tab('show');
+            } else if (!$('#preco_unico').is(':checked')) {
+                let temPrecoPorData = false;
+                let temPrecoPorDia = false;
+
+                // Verifica preços por datas específicas
+                $('#precos-especificos .d-flex').each(function () {
+                    const dataInicio = $(this).find('input[name="data_inicio[]"]').val();
+                    const dataFim = $(this).find('input[name="data_fim[]"]').val();
+                    const preco = $(this).find('input[name="precos_especificos[]"]').val();
+
+                    if (dataInicio && dataFim && preco && parseFloat(preco) > 0) {
+                        temPrecoPorData = true;
+                    }
+                });
+
+                // Verifica preços dos dias ativos
+                $('.checkbox-dia:checked').each(function () {
+                    const inputPreco = $(this).closest('.d-flex').find('.preco-input');
+
+                    if (inputPreco.val() && parseFloat(inputPreco.val()) > 0) {
+                        temPrecoPorDia = true;
+                    }
+                });
+
+                // Se nenhum dos dois estiver preenchido corretamente, gera erro
+                if (!temPrecoPorData && !temPrecoPorDia) {
+                    formValid = false;
+                    showError(
+                        '#prices-content',
+                        'Preencha pelo menos um preço por data específica ou um preço por dia da semana ativo.'
+                    );
+                    $('#prices-tab').tab('show');
+                }
+            }
         }
 
         const categoriasProdutos = [];
