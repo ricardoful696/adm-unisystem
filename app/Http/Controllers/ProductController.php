@@ -639,6 +639,9 @@ class ProductController extends Controller
 
             if ($produto->promocao_id) {
                 $promocaoId = $produto->promocao_id;
+                $produto->promocao_id = null;
+                $produto->promocao = false;
+                $produto->save();
             
                 PromocaoNivel::where('promocao_id', $promocaoId)->delete();
                 PromocaoCompreEGanhe::where('promocao_id', $promocaoId)->delete();
@@ -647,10 +650,7 @@ class ProductController extends Controller
                 PromocaoDataEspecifica::where('promocao_id', $promocaoId)->delete();
             
                 Promocao::where('promocao_id', $promocaoId)->delete();
-            
-                $produto->promocao_id = null;
-                $produto->promocao = false;
-                $produto->save();
+                
             }
             
             if (!empty($promocoes)) {
