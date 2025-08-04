@@ -152,8 +152,13 @@ class LoginController extends Controller
         if (session()->has('adm')) {
             session(['adm' => false]);
         }
+
         $nomeEmpresa = Session::get('empresa');
+
         Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
+
         return redirect()->route('showLoginForm', ['empresa' => $nomeEmpresa]);
     }
 
