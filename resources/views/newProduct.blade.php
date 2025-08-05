@@ -145,7 +145,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 preco-por-dia my-3">
+                        <div class="col-6 preco-por-dia my-3" id="bloco-dias-da-semana">
                             <h5>Preço Padrão</h5>
                             <div class="d-flex">
                                 <div class="me-3">
@@ -743,14 +743,16 @@ $(document).ready(function () {
     function togglePriceFields() {
         if ($('#preco_unico').is(':checked')) {
             $('#valor_unico').prop('disabled', false);
-            $('input[name="data_inicio[]"], input[name="data_fim[]"], input[name="precos_especificos[]"]').prop('disabled', true);
+            //$('input[name="data_inicio[]"], input[name="data_fim[]"], input[name="precos_especificos[]"]').prop('disabled', true);
             $('#preco-segunda, #preco-terca, #preco-quarta, #preco-quinta, #preco-sexta, #preco-sabado, #preco-domingo, #preco-feriado').prop('disabled', true);
-            $('.add-date-price').prop('disabled', true);
+            // $('.add-date-price').prop('disabled', true);
+            $('#bloco-dias-da-semana').hide();
         } else {
             $('#valor_unico').prop('disabled', true);
-            $('input[name="data_inicio[]"], input[name="data_fim[]"], input[name="precos_especificos[]"]').prop('disabled', false);
+            //$('input[name="data_inicio[]"], input[name="data_fim[]"], input[name="precos_especificos[]"]').prop('disabled', false);
             $('#preco-segunda, #preco-terca, #preco-quarta, #preco-quinta, #preco-sexta, #preco-sabado, #preco-domingo, #preco-feriado').prop('disabled', false);
-            $('.add-date-price').prop('disabled', false);
+            // $('.add-date-price').prop('disabled', false);
+            $('#bloco-dias-da-semana').show();
         }
     }
 
