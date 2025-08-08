@@ -5,7 +5,7 @@ function logout() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken
+            'X-CSRF-TOKEN': csrfToken 
         }
     })
     .then(response => {

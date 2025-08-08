@@ -401,13 +401,15 @@ class ProductController extends Controller
     public function updateCalendarProduct(Request $request)
     {   
         $productId = $request->input('produto_id');
+        $precoPorDia = $request->input('preco_por_dia', []);
+        $tipo_preco = $request->input('tipo_preco');
+        $valor_unico = $request->input('valor_unico');
         $dias_ativos = $request->input('dias_ativos');
         $tipo_geral = $request->input('tipo_geral');
 
         $empresaId = Auth::user()->empresa_id;
         
         try {
-
             DB::beginTransaction();
 
             if ($tipo_geral) {
@@ -422,13 +424,13 @@ class ProductController extends Controller
                 try {
                     $mapaDias = [
                         'segunda-feira' => 'segunda',
-                        'terça-feira' => 'terca',
-                        'quarta-feira' => 'quarta',
-                        'quinta-feira' => 'quinta',
-                        'sexta-feira'  => 'sexta',
-                        'sábado'       => 'sabado',
-                        'domingo'      => 'domingo',
-                        'feriado'      => 'feriado',
+                        'terça-feira'   => 'terca',
+                        'quarta-feira'  => 'quarta',
+                        'quinta-feira'  => 'quinta',
+                        'sexta-feira'   => 'sexta',
+                        'sábado'        => 'sabado',
+                        'domingo'       => 'domingo',
+                        'feriado'       => 'feriado',
                     ];
 
                     foreach ($dias_ativos as $diaLabel => $status) {
@@ -447,16 +449,59 @@ class ProductController extends Controller
                     throw $e;
                 }
             }
+                
+            if ($tipo_preco == 'dia_semana') {
+                $preco = ProdutoPreco::where('produto_id', $productId)->first();
+                
+                if ($preco) {
+                    $preco->delete(); 
+
+                    try {
+                        $mapaDias = [
+                            'segunda-feira' => 'segunda',
+                            'terça-feira'   => 'terca',
+                            'quarta-feira'  => 'quarta',
+                            'quinta-feira'  => 'quinta',
+                            'sexta-feira'   => 'sexta',
+                            'sábado'        => 'sabado',
+                            'domingo'       => 'domingo',
+                            'feriado'       => 'feriado',
+                        ];
+
+                        foreach ($dias_ativos as $diaLabel => $status) {
+                            $diaBanco = $mapaDias[strtolower($diaLabel)] ?? null;
+
+                            if ($diaBanco) {
+                                CalendarioParametro::where('empresa_id', $empresaId)
+                                    ->where('dia_semana', $diaBanco)
+                                    ->update(['status' => filter_var($status, FILTER_VALIDATE_BOOLEAN)]);
+                            }
+                        }
+
+                        DB::commit();
+                    } catch (\Throwable $e) {
+                        DB::rollBack();
+                        throw $e;
+                    }
+                }
+            }
 
             DB::commit();
 
-            return response()->json(['success' => true, 'message' => 'Produto atualizado com sucesso!']);
+            return response()->json([
+                'success' => true, 
+                'message' => 'Produto atualizado com sucesso!'
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
 
-            return response()->json(['success' => false, 'message' => 'Erro ao atualizar o produto: ' . $e->getMessage()]);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Erro ao atualizar o produto: ' . $e->getMessage()
+            ]);
         }
     }
+
     public function productUpdate(Request $request)
     {
         $produtoId = $request->input('produto_id');
