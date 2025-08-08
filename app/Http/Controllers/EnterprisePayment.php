@@ -15,19 +15,25 @@ class EnterprisePayment extends Controller
     {
         $empresaId = Auth::user()->empresa_id;
         $empresa = Empresa::where('empresa_id', $empresaId)
-        ->with('parametroEmpresa')
-        ->first();
-        $empresasPagamento = EmpresaPagamento::all(); 
-        $empresaPagamentoId = $empresa->parametroEmpresa->empresa_pagamento_id;
-        
-        if($empresaPagamentoId == 1){
-            $empresaPagamento = Empresa::where('empresa_id', $empresaId)
-            ->with('parametroEmpresa', 'efipayParametro')
+            ->with('parametroEmpresa')
             ->first();
+
+        $empresaPagamentoId = optional($empresa->parametroEmpresa)->empresa_pagamento_id ?? 0;
+        $empresasPagamento = EmpresaPagamento::all();
+
+        // Carrega dados adicionais com base no empresaPagamentoId
+        if ($empresaPagamentoId == 1) {
+            $empresaPagamento = Empresa::where('empresa_id', $empresaId)
+                ->with('parametroEmpresa', 'efipayParametro')
+                ->first();
+        } elseif ($empresaPagamentoId == 2) {
+            $empresaPagamento = Empresa::where('empresa_id', $empresaId)
+                ->with('parametroEmpresa', 'pagarmeParametro')
+                ->first();
+        } else {
+            $empresaPagamento = $empresa;
         }
-        return view('enterprisePayment', [
-            'empresaPagamento' => $empresaPagamento,
-            'empresasPagamento' => $empresasPagamento,
-        ]);
+
+        return view('enterprisePayment', compact('empresaPagamento', 'empresasPagamento', 'empresaPagamentoId'));
     }
 }

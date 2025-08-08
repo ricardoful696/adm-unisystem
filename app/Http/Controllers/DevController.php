@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EmpresaPagamento;
+use App\Models\ParametroEmpresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Empresa;
@@ -35,6 +37,11 @@ class DevController extends Controller
             $Empresa->cnpj = $cnpj;
           
             $Empresa->save();
+
+            $EmpresaParametro = new ParametroEmpresa();
+            $EmpresaParametro->empresa_id = $empresa_id;
+          
+            $EmpresaParametro->save();
     
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Empresa salva com sucesso!']);

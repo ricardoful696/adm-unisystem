@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EfipayParametro;
 use App\Models\Empresa;
 use App\Models\EmpresaPagamento;
+use App\Models\PagarmeParametro;
 use App\Models\ParametroEmpresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -241,6 +242,95 @@ class ConfigurationController extends Controller
             return response()->json(['success' => false, 'error' => 'Erro ao salvar configurações. Tente novamente mais tarde.']);
         }
     }
+
+         public function savePagarmeConfig(Request $request)
+        {
+            $data = $request->validate([
+                'conta_pagarme_id' => 'nullable|string',
+                'api_key' => 'nullable|string',
+                'chave_desenvolvimento' => 'nullable|string',
+                'chave_producao' => 'nullable|string',
+                'homologacao' => 'required|in:0,1,true,false',
+                'producao' => 'required|in:0,1,true,false',
+                'empresa_pagamento_id' => 'required|integer|exists:empresa_pagamento,empresa_pagamento_id',
+            ]);
+
+            $empresaId = Auth::user()->empresa_id;
+
+            // Converte valores para booleanos
+            $data['homologacao'] = filter_var($data['homologacao'], FILTER_VALIDATE_BOOLEAN);
+            $data['producao'] = filter_var($data['producao'], FILTER_VALIDATE_BOOLEAN);
+
+            // Garante que apenas um dos campos seja true
+            if ($data['homologacao']) {
+                $data['producao'] = false;
+            } elseif ($data['producao']) {
+                $data['homologacao'] = false;
+            }
+
+            DB::beginTransaction();
+
+            try {
+                // Verifica se já existe um registro para o empresa_id
+                $existingRecord = PagarmeParametro::where('empresa_id', $empresaId)->first();
+
+                Log::debug('Registro existente em pagarme_parametro', [
+                    'empresa_id' => $empresaId,
+                    'exists' => !is_null($existingRecord),
+                    'pagarme_parametro_id' => $existingRecord ? $existingRecord->pagarme_parametro_id : null,
+                ]);
+
+                // Atualiza ou cria o registro em parametro_empresa
+                ParametroEmpresa::updateOrCreate(
+                    ['empresa_id' => $empresaId],
+                    ['empresa_pagamento_id' => $data['empresa_pagamento_id']]
+                );
+
+                // Atualiza ou cria o registro em pagarme_parametro
+                PagarmeParametro::updateOrCreate(
+                    ['empresa_id' => $empresaId], // Condição para encontrar o registro
+                    [
+                        'conta_pagarme_id' => $data['conta_pagarme_id'],
+                        'api_key' => $data['api_key'],
+                        'chave_desenvolvimento' => $data['chave_desenvolvimento'],
+                        'chave_producao' => $data['chave_producao'],
+                        'homologacao' => $data['homologacao'],
+                        'producao' => $data['producao'],
+                        'empresa_pagamento_id' => 2,
+                    ]
+                );
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Configurações salvas com sucesso!'
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                DB::rollBack();
+                Log::error('Erro de validação ao salvar configurações Pagar.me', [
+                    'error' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                    'request' => $request->all()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                    'errors' => $e->errors()
+                ], 422);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Erro ao salvar configurações Pagar.me', [
+                    'error' => $e->getMessage(),
+                    'request' => $request->all(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Erro ao salvar configurações: ' . $e->getMessage()
+                ], 500);
+            }
+        }
 
 
     public function uploadCertificate(Request $request)

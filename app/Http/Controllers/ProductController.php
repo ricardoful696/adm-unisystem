@@ -44,12 +44,17 @@ class ProductController extends Controller
         $empresaId = Auth::user()->empresa_id;
 
         $produtos = Produto::where('empresa_id', $empresaId)
-        ->with('categoriaProduto.tipoProduto') 
-        ->get();
-
+            ->where('ativo', true)
+            ->with('categoriaProduto.tipoProduto')
+            ->get();
+        $produtosInativos = Produto::where('empresa_id', $empresaId)
+            ->where('ativo', false)
+            ->with('categoriaProduto.tipoProduto')
+            ->get();
+        
         $categorias = CategoriaProduto::all();
 
-        return view('product', ['produtos' => $produtos, 'categorias' => $categorias]);
+        return view('product', ['produtos' => $produtos, 'categorias' => $categorias, 'produtosInativos' => $produtosInativos]);
     }
 
     
@@ -57,11 +62,7 @@ class ProductController extends Controller
     {
         $empresaId = Auth::user()->empresa_id;
 
-        $categorias = CategoriaProduto::where('empresa_id', $empresaId)
-        ->with('empresa', 'tipoProduto') 
-        ->get();
-
-        $categorias = CategoriaProduto::all();
+        $categorias = CategoriaProduto::where('empresa_id', $empresaId)->get();
 
         return view('categoryView', ['categorias' => $categorias]);
     }
@@ -186,6 +187,7 @@ class ProductController extends Controller
 
     public function saveProduct(Request $request)
     {   
+        $ativo = $request->boolean('ativo');
         $bilhete = $request->boolean('bilhete'); 
         $produto_fixo = $request->boolean('produto_fixo'); 
         $titulo = $request->input('titulo');
@@ -219,7 +221,7 @@ class ProductController extends Controller
             $produto->descricao = $descricao;
             $produto->termos_condicoes = $termos;
             $produto->url_capa = $url_capa;
-            $produto->ativo = true;
+            $produto->ativo = $ativo;
             $produto->venda_qtd_max = $venda_qtd_max;
             $produto->venda_qtd_max_diaria = $venda_qtd_max_diaria;
             $produto->qtd_entrada_saida = $qtd_entrada_saida;
@@ -399,9 +401,6 @@ class ProductController extends Controller
     public function updateCalendarProduct(Request $request)
     {   
         $productId = $request->input('produto_id');
-        $precoPorDia = $request->input('preco_por_dia', []);
-        $tipo_preco = $request->input('tipo_preco');
-        $valor_unico = $request->input('valor_unico');
         $dias_ativos = $request->input('dias_ativos');
         $tipo_geral = $request->input('tipo_geral');
 
@@ -448,90 +447,6 @@ class ProductController extends Controller
                     throw $e;
                 }
             }
-                 
-            if($tipo_preco == 'dia_semana'){
-                $preco = ProdutoPreco::where('produto_id', $productId)->first();
-                
-                if ($preco) {
-                    $preco->delete(); 
-
-                    foreach ($precoPorDia as $dia => $valor) {
-                        $registro = new ProdutoPrecoDia();
-                        $registro->produto_id = $productId;
-                        $registro->dia_semana = $dia;
-                        $registro->valor = is_numeric($valor) && $valor !== 'NaN' ? (float) $valor : null;
-                        $registro->ativo = is_numeric($valor) && $valor !== 'NaN' ? true : false;
-                        $registro->save();
-                    }
-                }else  {
-
-                    $precoDia = ProdutoPrecoDia::where('produto_id', $productId)->get();
-
-                    foreach ($precoDia as $registro) {
-                        switch ($registro->dia_semana) {
-                            case 'segunda':
-                                $valor = isset($precoPorDia['segunda']) ? $precoPorDia['segunda'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'terca':
-                                $valor = isset($precoPorDia['terca']) ? $precoPorDia['terca'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'quarta':
-                                $valor = isset($precoPorDia['quarta']) ? $precoPorDia['quarta'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'quinta':
-                                $valor = isset($precoPorDia['quinta']) ? $precoPorDia['quinta'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'sexta':
-                                $valor = isset($precoPorDia['sexta']) ? $precoPorDia['sexta'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'sabado':
-                                $valor = isset($precoPorDia['sabado']) ? $precoPorDia['sabado'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'domingo':
-                                $valor = isset($precoPorDia['domingo']) ? $precoPorDia['domingo'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                            case 'feriado':
-                                $valor = isset($precoPorDia['feriado']) ? $precoPorDia['feriado'] : null;
-                                $registro->valor = (is_numeric($valor) && $valor !== 'NaN') ? (float) $valor : null;
-                                $registro->ativo = (is_numeric($valor) && $valor !== 'NaN') ? true : false;
-                                break;
-                        }
-                        $registro->save();
-                    }
-                }
-            }else {
-                $precoDia = ProdutoPrecoDia::where('produto_id', $productId)->get();
-                
-                if ($precoDia) {
-                    foreach ($precoDia as $item) {
-                        $item->delete();  
-                    }
-
-                    $preco = new ProdutoPreco();
-                    $preco->produto_id = $productId;
-                    $preco->valor = $valor_unico;
-                    $preco->valor_promocional = null;
-                    $preco->save();
-                }
-
-                $precoDia = ProdutoPreco::where('produto_id', $productId)->first();
-                $precoDia->valor = $valor_unico;
-                $precoDia->save();
-            }
 
             DB::commit();
 
@@ -547,6 +462,7 @@ class ProductController extends Controller
         $produtoId = $request->input('produto_id');
         $produto = Produto::where('produto_id', $produtoId)->firstOrFail();
 
+        $ativo = $request->boolean('ativo');
         $titulo = $request->input('titulo');
         $subtitulo = $request->input('subtitulo');
         $descricao = $request->input('descricao');
@@ -577,7 +493,7 @@ class ProductController extends Controller
             $produto->qtd_entrada_saida = $qtd_entrada_saida;
             $produto->bilhete = $bilhete;
             $produto->produtos_fixos_combo = $produto_fixo;
-            $produto->ativo = true;
+            $produto->ativo = $ativo;
             $produto->save();
 
             // Atualiza imagem se necessário

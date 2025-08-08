@@ -33,13 +33,21 @@
             <div class="tab-pane fade show active" id="info" role="tabpanel" aria-labelledby="info-tab">
                 <div class="d-flex gap-3 flex-column justify-content-center mt-4">
                     <div class="d-flex flex-column">
+                        <div class="form-check my-3">
+                            <input type="checkbox" name="ativo" id="ativo" class="form-check-input" {{ $produto->ativo ? 'checked' : '' }}>
+                            <label for="ativo" class="form-check-label">Ativo</label>
+                        </div>
                         <div class="form-check mt-1 mb-0">
                             <input type="checkbox" name="bilhete" id="bilhete" class="form-check-input" {{ $produto->bilhete ? 'checked' : '' }}>
                             <label for="bilhete" class="form-check-label">Bilhete</label>
                         </div>
-                        <div class="form-check mt-1 mb-0">
+                        <div class="form-check mt-1 ms-2 mb-0">
                             <input type="checkbox" name="produto_fixo" id="produto_fixo" class="form-check-input" {{ $produto->produtos_fixos_combo ? 'checked' : '' }}>
                             <label for="produto_fixo" class="form-check-label">Produtos fixos</label>
+                        </div>
+                        <div class="form-check my-3">
+                            <input type="checkbox" name="produto_base" id="produto_base" class="form-check-input">
+                            <label for="produto_base" class="form-check-label">Produtos fixos</label>
                         </div>
                     </div>
                     <div class="d-flex gap-3">
@@ -442,6 +450,16 @@ function togglePromotionsTab() {
         $('#info').addClass('show active');
     }
 }
+document.addEventListener('DOMContentLoaded', function () {
+        $('#produto_base').on('change', function () {
+            if ($(this).is(':checked')) {
+                // Desmarca bilhete e produto_fixo quando produto_base é marcado
+                $('#bilhete').prop('checked', false);
+                $('#produto_fixo').prop('checked', false);
+                // Atualiza a aba de promoções
+                togglePromotionsTab();
+            }
+        });
 
 // Função para habilitar/desabilitar a aba de preços com base no checkbox "Produto Fixo"
 function togglePricesTab() {
@@ -464,6 +482,27 @@ function togglePricesTab() {
         $('#info').addClass('show active');
     }
 }
+        // Adiciona evento para o checkbox bilhete
+        $('#bilhete').on('change', function () {
+            if ($(this).is(':checked')) {
+                // Desmarca produto_base quando bilhete é marcado
+                $('#produto_base').prop('checked', false);
+            }
+            // Atualiza a aba de promoções
+            togglePromotionsTab();
+        });
+
+          $('#produto_fixo').on('change', function () {
+            if ($(this).is(':checked')) {
+                // Desmarca produto_base quando bilhete é marcado
+                $('#produto_base').prop('checked', false);
+                $('#bilhete').prop('checked', true);
+
+            }
+            // Atualiza a aba de promoções
+            togglePromotionsTab();
+        });
+    });
 
 // Função para renderizar os campos dinâmicos com base no tipo de promoção
 function renderPromocaoFields(tipoId) {
@@ -777,7 +816,9 @@ document.getElementById('capa').addEventListener('change', function (e) {
         reader.readAsDataURL(file);
     }
 });
-
+    console.log(produtoData);
+    console.log(produtoData.combo); 
+    
 document.addEventListener('DOMContentLoaded', function () {
     const dynamicFields = document.getElementById('dynamicFields');
     let fieldIndex = 0;
@@ -824,6 +865,8 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         console.log("combo não existe ou não é um array válido.");
     }
+
+    
 
     document.getElementById('addRow').addEventListener('click', () => createRow());
 
@@ -1388,6 +1431,7 @@ $(document).ready(function () {
 
             let formData = new FormData();
             formData.append('produto_id', $('#produto_id').val());
+            formData.append('ativo', $('#ativo').prop('checked') ? 1 : 0);
             formData.append('produto_fixo', $('#produto_fixo').prop('checked') ? 1 : 0);
             formData.append('bilhete', $('#bilhete').prop('checked') ? 1 : 0);
             formData.append('titulo', $('#titulo').val());

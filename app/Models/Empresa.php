@@ -75,5 +75,10 @@ class Empresa extends Model
         return $this->hasOne(EfipayParametro::class, 'empresa_id');
     }
 
+     public function pagarmeParametro()
+    {
+        return $this->hasOne(PagarmeParametro::class, 'empresa_id');
+    }
+
 
 }

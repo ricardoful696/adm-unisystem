@@ -26,17 +26,9 @@
                     <option value="">Selecione um Produto</option>
                 </select>
             </div>
-            <div id="div-tipo_preco" class="col-3 mb-4">
-                <label for="tipo_preco" class="form-label">Tipo de Preço</label>
-                <select id="tipo_preco" class="form-cont">
-                    <option value="">Selecione um Produto</option>
-                    <option value="valor_unico">Valor Unico </option>
-                    <option value="dia_semana">Dias da Semana</option>
-                </select>
-            </div>
         </div>
         <div class="d-flex justify-content-center px-5 gap-5">
-            <div id="dia_semana" class="col-12 col-md-3 preco-por-dia mt-2 align-self-start">
+            <div id="dia_semana" class="col-12 col-md-3 preco-por-dia mt-2 align-self-start d-none">
                 <div class="d-flex">
                     <div class="me-3">
                         <label class="fw-bold">Ativo</label>
@@ -122,90 +114,6 @@
                     </div>
                 </div>
             </div>
-            <div id="geral" class="col-12 col-md-3 preco-geral mt-2 align-self-start" style="display:none;">
-                <div class="d-flex">
-                    <div class="me-3">
-                        <label class="fw-bold">Ativo</label>
-                    </div>
-                    <div>
-                        <label class="fw-bold">Dias</label>
-                    </div>
-                </div>
-                <div class="d-flex gap-2">
-                    <div class="d-flex flex-column">
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="segunda" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label>Segunda</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="terca" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Terça</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quarta" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Quarta</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="quinta" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Quinta</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sexta" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Sexta</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="sabado" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Sábado</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="domingo" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Domingo</label>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-end gap-3 mt-1">
-                            <div class="d-flex justify-content-center col-2 mb-2">
-                                <input type="checkbox" class="checkbox-dia" name="ativo[]" value="feriado" checked>
-                            </div>
-                            <div class="d-flex flex-column">
-                                <label> Feriado</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="valor" class="col-12 col-md-3 preco-por-dia mt-2 align-self-start" style="display:none;">
-                <div class="d-flex flex-column">
-                    <label class="fw-bold"> Valor Único</label>
-                    <input type="number" class="class-input col-5" id="valor_unico">
-                </div>
-            </div>
             <div id="calendar" class="col-10 col-md-9 justify-content-center ">
             </div>
         </div>
@@ -282,31 +190,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const tipoPrecoSelect = document.getElementById('tipo_preco');
-        const divDiaSemana = document.getElementById('dia_semana');
-        const divValorUnico = document.getElementById('valor');
-
-        function atualizarVisibilidade() {
-            const valorSelecionado = tipoPrecoSelect.value;
-
-            if (valorSelecionado === 'dia_semana') {
-                divDiaSemana.style.display = 'block';
-                divValorUnico.style.display = 'none';
-            } else if (valorSelecionado === 'valor_unico') {
-                divDiaSemana.style.display = 'none';
-                divValorUnico.style.display = 'block';
-            } else {
-                divDiaSemana.style.display = 'none';
-                divValorUnico.style.display = 'none';
-            }
-        }
-
-        tipoPrecoSelect.addEventListener('change', atualizarVisibilidade);
-
-        atualizarVisibilidade();
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
         const empresa = "{{ $empresa }}";
         const categoriaSelect = document.getElementById('categoria');
         const produtoSelect = document.getElementById('produto');
@@ -323,16 +206,13 @@
             if (categoriaId === 'categoriaGeral') {
                 document.querySelector('#div-produto label').style.display = 'none';
                 document.querySelector('#div-produto select').style.display = 'none';
-                document.querySelector('#div-tipo_preco label').style.display = 'none';
-                document.querySelector('#div-tipo_preco select').style.display = 'none';
-                divDiaSemana.style.display = 'block';
+                divDiaSemana.classList.remove('d-none');
                 allCalendarEdit();
                 esconderInputsNumber()
             } else if (categoriaId) {
                 document.querySelector('#div-produto label').style.display = 'block';
                 document.querySelector('#div-produto select').style.display = 'block';
-                document.querySelector('#div-tipo_preco label').style.display = 'block';
-                document.querySelector('#div-tipo_preco select').style.display = 'block';
+                divDiaSemana.classList.add('d-none');
                 $.ajax({
                     url: `/getProduct/${categoriaId}`,
                     type: 'GET',
@@ -609,21 +489,11 @@
 
     });
 
-
-
-
-
     $('#saveProductButton').on('click', function (e) {
         e.preventDefault();
 
         let produtoId = $('#produto').val();
-        let tipoPreco = $('#tipo_preco').val();
         let geral = $('#categoria').val();
-        let valor_unico = null;
-        let precoPorDia = null;
-
-        console.log(produtoId);
-        console.log(tipoPreco);
 
         let diasAtivos = {};
         let tipoGeral = false;
@@ -653,29 +523,8 @@
             tipoGeral = true;
         }
 
-        if (tipoPreco == 'dia_semana') {
-            precoPorDia = {
-                segunda: parseFloat($('#preco-segunda').val()).toFixed(2),
-                terca: parseFloat($('#preco-terca').val()).toFixed(2),
-                quarta: parseFloat($('#preco-quarta').val()).toFixed(2),
-                quinta: parseFloat($('#preco-quinta').val()).toFixed(2),
-                sexta: parseFloat($('#preco-sexta').val()).toFixed(2),
-                sabado: parseFloat($('#preco-sabado').val()).toFixed(2),
-                domingo: parseFloat($('#preco-domingo').val()).toFixed(2),
-                feriado: parseFloat($('#preco-feriado').val()).toFixed(2)
-            };
-        } else {
-            let preco_unico = $('#preco_unico').prop('checked') ? 1 : 0;
-            valor_unico = parseFloat($('#valor_unico').val()).toFixed(2);
-            console.log('passo');
-            console.log(valor_unico);
-        }
-
         var formData = {
             produto_id: produtoId,
-            tipo_preco: tipoPreco,
-            valor_unico: valor_unico,
-            preco_por_dia: precoPorDia,
             dias_ativos: diasAtivos,
             tipo_geral: tipoGeral,
             _token: $('input[name="_token"]').val()

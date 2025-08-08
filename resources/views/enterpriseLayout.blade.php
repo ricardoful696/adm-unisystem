@@ -10,8 +10,17 @@
             <div class="row">
                 @foreach ($colunas as $campo)
                     @php
-                        $imgPath = $empresa->empresaImg->{$campo} ?? 'https://via.placeholder.com/300x200.png?text=No+Image';
+                        $imgPath = isset($empresa->empresaImg->{$campo}) 
+		    ? str_replace('http://', 'https://', $empresa->empresaImg->{$campo}) 
+		    : 'https://via.placeholder.com/300x200.png?text=No+Image';
                         $label = ucfirst(str_replace('_', ' ', $campo)); 
+                        if (stripos($campo, 'footer') !== false) {
+                            $label = 'Rodapé';
+                        } elseif (stripos($campo, 'header') !== false) {
+                            $label = 'Cabeçalho';
+                        } else {
+                            $label = ucfirst(str_replace('_', ' ', $campo));
+                        }
                         $imgSize = $imgTamanho->{$campo} ?? 'Tamanho não especificado'; 
                     @endphp
                     <div class="col-4 image-card">

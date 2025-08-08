@@ -90,6 +90,7 @@ use App\Http\Controllers\ReportController;
                 Route::post('/batchUpdate', [BatchController::class, 'batchUpdate'])->name('batchUpdate');
                 Route::post('/getCategory', [BatchController::class, 'getCategory'])->name('getCategory');
                 Route::post('/getDetails', [BatchController::class, 'getDetails'])->name('getDetails');
+
             //CONFIGURACOES
                 Route::get('/enterpriseConfig', [ConfigurationController::class, 'configurationView'])->name('configurationView');
                 Route::post('/saveEnterpriseConfig', [ConfigurationController::class, 'saveConfiguration'])->name('saveConfiguration');
@@ -97,13 +98,15 @@ use App\Http\Controllers\ReportController;
                 Route::post('/saveEnterprisePaymentConfig', [ConfigurationController::class, 'savePaymentConfiguration'])->name('savePaymentConfiguration');
                 Route::post('/uploadCertificate', [ConfigurationController::class, 'uploadCertificate'])->name('uploadCertificate');
                 Route::post('/saveEfiConfigPayment', [ConfigurationController::class, 'saveEfiConfigPayment'])->name('saveEfiConfigPayment');
-                
+                Route::post('/save-pagarme-config', [ConfigurationController::class, 'savePagarmeConfig'])->name('savePagarmeConfigPayment');
             
             //EMPRESA PAGAMENTO
                 Route::get('/enterprisePaymentView', [EnterprisePayment::class, 'enterprisePaymentView'])->name('enterprisePayment');
+
             //RELATORIO
                 Route::get('/reportView', [ReportController::class, 'reportView'])->name('reportView');    
                 Route::post('/generateReport', [ReportController::class, 'generateReport'])->name('generateReport');  
+                
             //DEVELOPER
                 Route::get('/enterpriseDevConfig', [DevController::class, 'entepriseDevView'])->name('enterpriseDevConfig');
                 Route::post('/saveEnterpriseDev', [DevController::class, 'saveEnterpriseDev'])->name('saveEnterpriseDev');

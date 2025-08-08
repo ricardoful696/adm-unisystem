@@ -73,9 +73,16 @@ class EmpresaController extends Controller
     
         $campo = $request->campo;
         $empresaImg = EmpresaImg::where('empresa_id', $empresaId)->first();
-    
-        if (!$empresaImg) {
-            return response()->json(['success' => false, 'message' => 'Empresa não encontrada.']);
+
+        $empresaImg = EmpresaImg::where('empresa_id', $empresaId)->first();
+
+       if (!$empresaImg) {
+            $maxId = EmpresaImg::max('empresa_img_id') ?? 0;
+            $nextId = $maxId + 1;
+
+            $empresaImg = new EmpresaImg();
+            $empresaImg->empresa_img_id = $nextId;
+            $empresaImg->empresa_id = $empresaId;
         }
     
         $path = $request->file('image')->store('empresa_img', 'public');
