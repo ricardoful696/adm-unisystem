@@ -175,7 +175,7 @@
             </div>
 
             <!-- Preço Padrão -->
-            <div class="col-6 preco-por-dia my-3">
+            <div class="col-6 preco-por-dia my-3" id="bloco-dias-da-semana">
                 <h5>Preço Padrão</h5>
                 <div class="d-flex">
                     <div class="me-3">
@@ -1093,6 +1093,7 @@ $(document).ready(function () {
         // Desativa os campos de Preço Padrão (dias específicos e checkboxes)
         $('#preco-segunda, #preco-terca, #preco-quarta, #preco-quinta, #preco-sexta, #preco-sabado, #preco-domingo, #preco-feriado').prop('disabled', true);
         $('.checkbox-dia').prop('disabled', true);
+        $('#bloco-dias-da-semana').hide();
         
     } else {
         // Desativa o campo de Valor Único
@@ -1101,6 +1102,7 @@ $(document).ready(function () {
         // Ativa os campos de Preço Padrão (dias específicos e checkboxes)
         $('#preco-segunda, #preco-terca, #preco-quarta, #preco-quinta, #preco-sexta, #preco-sabado, #preco-domingo, #preco-feriado').prop('disabled', false);
         $('.checkbox-dia').prop('disabled', false);
+        $('#bloco-dias-da-semana').show();
     }
 }
 
